@@ -1,0 +1,396 @@
+/* ==========================================================================
+   SEED Project Tracker — design system
+   Forest / earthy palette (from the project outline §10) mapped onto the
+   glassmorphism technique (blur, translucent borders, edge highlights, glass
+   shadows) from the glassmorphism design skill.
+
+   Design-system rule honored here: tokens are agnostic CSS custom properties,
+   NOT Tailwind classes. Component classes below implement the mapping. Dark
+   mode is automatic via prefers-color-scheme — values never swapped manually.
+   ========================================================================== */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- Tokens: light mode (default) --------------------------------------- */
+:root {
+  /* Backgrounds — warm paper white / misty sage */
+  --bg-base: #f4f1ea;
+  --bg-alt: #dce3d5;
+  --surface: #fbfaf6; /* near-solid panel for dense tables where readability matters */
+
+  /* Text — warm charcoal, never pure black */
+  --text-heading: #2b2b26;
+  --text-body: #545049;
+  --text-body-subtle: #76726a;
+
+  /* Greens */
+  --brand: #3a5a40; /* forest/pine — primary */
+  --brand-strong: #2e4034;
+  --brand-soft: #e8efe4;
+  --moss: #588157;
+  --sage: #a3b18a;
+
+  /* Earth accents (used sparingly) */
+  --bark: #6f4e37;
+  --clay: #b07156;
+
+  /* Project-health status (earthy, not traffic-light) */
+  --status-on-track: #588157; /* moss */
+  --status-at-risk: #c99846; /* muted ochre */
+  --status-behind: #a4503c; /* clay red */
+  --status-on-track-bg: rgba(88, 129, 87, 0.14);
+  --status-at-risk-bg: rgba(201, 152, 70, 0.16);
+  --status-behind-bg: rgba(164, 80, 60, 0.15);
+
+  /* Focus ring */
+  --ring: rgba(58, 90, 64, 0.35);
+
+  /* Glass surfaces (tinted by the earthy backdrop) */
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-bg-hover: rgba(255, 255, 255, 0.58);
+  --glass-border: rgba(43, 43, 38, 0.10);
+  --glass-border-subtle: rgba(43, 43, 38, 0.06);
+  --glass-shadow: 0 8px 32px rgba(43, 43, 38, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(255, 255, 255, 0.15);
+  --glass-edge-top: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  --glass-edge-left: linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent, rgba(255, 255, 255, 0.2));
+
+  --font-sans: var(--font-inter), "Google Sans", system-ui, -apple-system, sans-serif;
+  --shadow-xs: 0 1px 2px rgba(43, 43, 38, 0.08);
+}
+
+/* ---- Tokens: dark mode (deep forest / charcoal-green) ------------------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-base: #1e2a22;
+    --bg-alt: #26332b;
+    --surface: #243029;
+
+    --text-heading: #eceae0;
+    --text-body: #b9c0b1;
+    --text-body-subtle: #8f978a;
+
+    --brand: #7faa7a; /* lighter on dark for contrast */
+    --brand-strong: #a3b18a;
+    --brand-soft: rgba(127, 170, 122, 0.16);
+    --moss: #7faa7a;
+    --sage: #a3b18a;
+
+    --bark: #a98a6f;
+    --clay: #cd8a72;
+
+    --status-on-track: #7faa7a;
+    --status-at-risk: #d8ad63;
+    --status-behind: #cd8a72;
+    --status-on-track-bg: rgba(127, 170, 122, 0.18);
+    --status-at-risk-bg: rgba(216, 173, 99, 0.18);
+    --status-behind-bg: rgba(205, 138, 114, 0.18);
+
+    --ring: rgba(127, 170, 122, 0.4);
+
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-bg-hover: rgba(255, 255, 255, 0.13);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-border-subtle: rgba(255, 255, 255, 0.06);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+    --glass-edge-top: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    --glass-edge-left: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent, rgba(255, 255, 255, 0.05));
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* ---- Base ---------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-body);
+  background-color: var(--bg-base);
+  /* Subtle organic depth: soft light "filtering through trees" + barely-there
+     topographic contour lines behind the glass. Felt, not noticed. */
+  background-image:
+    radial-gradient(1100px 700px at 12% -10%, rgba(163, 177, 138, 0.28), transparent 60%),
+    radial-gradient(900px 600px at 100% 0%, rgba(88, 129, 87, 0.16), transparent 55%),
+    repeating-linear-gradient(
+      115deg,
+      rgba(43, 43, 38, 0.018) 0px,
+      rgba(43, 43, 38, 0.018) 1px,
+      transparent 1px,
+      transparent 26px
+    );
+  background-attachment: fixed;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headings — medium weight, heading color, scale per typography.md */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-heading);
+  font-weight: 500;
+  margin: 0 0 0.5em;
+  line-height: 1.2;
+}
+h1 { font-size: 32px; letter-spacing: -0.4px; }
+h2 { font-size: 26px; }
+h3 { font-size: 22px; }
+h4 { font-size: 20px; }
+h5 { font-size: 18px; }
+h6 { font-size: 16px; }
+@media (min-width: 1024px) {
+  h1 { font-size: 44px; }
+  h2 { font-size: 34px; }
+  h3 { font-size: 28px; }
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ==========================================================================
+   Glass surfaces
+   ========================================================================== */
+
+/* Generic glass surface. Always force backdrop-filter so Tailwind/base resets
+   can't override it (per the design skill). */
+.glass {
+  position: relative;
+  overflow: hidden;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Edge highlights — light refraction along the top and left edges. */
+.glass::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--glass-edge-top);
+  pointer-events: none;
+}
+.glass::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 1px; height: 100%;
+  background: var(--glass-edge-left);
+  pointer-events: none;
+}
+
+.glass-card {
+  border-radius: 20px;
+  padding: 20px;
+}
+
+/* Interactive (clickable) card — only these get a hover change. */
+.glass-card-interactive {
+  transition: all 200ms ease;
+  cursor: pointer;
+}
+.glass-card-interactive:hover {
+  background: var(--glass-bg-hover);
+}
+
+/* Near-solid surface for dense data tables (readability over translucency). */
+.solid-card {
+  position: relative;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-xs);
+}
+
+/* ==========================================================================
+   Buttons (buttons.md) — glint effect on solid variants
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1;
+  padding: 10px 16px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, opacity 150ms ease;
+  box-sizing: border-box;
+  text-align: center;
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring);
+}
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+}
+.btn-sm { padding: 8px 12px; font-size: 13px; }
+.btn-lg { padding: 12px 20px; font-size: 16px; }
+
+/* Glint: base shadow + inset top highlight + soft outer glow. */
+.btn-brand, .btn-secondary, .btn-success, .btn-danger, .btn-warning {
+  box-shadow: var(--shadow-xs), inset rgba(255, 255, 255, 0.3) 0 6px 0 -5px,
+    rgba(0, 0, 0, 0.08) 0 4px 10px -5px;
+}
+.btn-brand {
+  background: var(--brand);
+  color: #fff;
+}
+.btn-brand:hover { background: var(--brand-strong); }
+
+.btn-secondary {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: var(--glass-border);
+  color: var(--text-body);
+}
+.btn-secondary:hover { background: var(--glass-bg-hover); color: var(--text-heading); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-heading);
+}
+.btn-ghost:hover { background: var(--glass-bg-hover); }
+
+.btn-danger { background: var(--status-behind); color: #fff; }
+.btn-danger:hover { filter: brightness(0.92); }
+.btn-success { background: var(--status-on-track); color: #fff; }
+.btn-success:hover { filter: brightness(0.92); }
+.btn-warning { background: var(--status-at-risk); color: #2b2b26; }
+.btn-warning:hover { filter: brightness(0.95); }
+
+/* ==========================================================================
+   Inputs (inputs.md)
+   ========================================================================== */
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-heading);
+  margin-bottom: 8px;
+}
+.input,
+.textarea,
+.select {
+  display: block;
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-heading);
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-xs);
+  transition: all 200ms ease;
+}
+.textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+.input::placeholder,
+.textarea::placeholder { color: var(--text-body-subtle); }
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand);
+}
+.input:disabled,
+.textarea:disabled,
+.select:disabled { opacity: 0.6; cursor: not-allowed; }
+.input-error { border-color: var(--status-behind); }
+
+/* ==========================================================================
+   Badges (status pills) — earthy, readable
+   ========================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.badge-dot { width: 7px; height: 7px; border-radius: 9999px; }
+
+.badge-on-track { background: var(--status-on-track-bg); color: var(--status-on-track); border-color: var(--status-on-track); }
+.badge-on-track .badge-dot { background: var(--status-on-track); }
+.badge-at-risk { background: var(--status-at-risk-bg); color: var(--status-at-risk); border-color: var(--status-at-risk); }
+.badge-at-risk .badge-dot { background: var(--status-at-risk); }
+.badge-behind { background: var(--status-behind-bg); color: var(--status-behind); border-color: var(--status-behind); }
+.badge-behind .badge-dot { background: var(--status-behind); }
+
+.badge-neutral { background: var(--glass-bg); color: var(--text-body); border-color: var(--glass-border); }
+.badge-late { background: var(--status-behind-bg); color: var(--status-behind); border-color: var(--status-behind); }
+
+/* ==========================================================================
+   Sidebar (sidebars.md)
+   ========================================================================== */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  color: var(--text-body);
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 200ms ease;
+}
+.nav-item:hover { background: var(--glass-bg-hover); color: var(--text-heading); }
+.nav-item-active { background: var(--brand-soft); color: var(--brand-strong); }
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+.muted { color: var(--text-body-subtle); }
+.heading-text { color: var(--text-heading); }
+.brand-text { color: var(--brand); }
+.divider { height: 1px; background: var(--glass-border-subtle); border: 0; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--glass-bg), var(--glass-bg-hover), var(--glass-bg));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 12px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+/* Collapse the two-column page grids on smaller screens. */
+@media (max-width: 900px) {
+  .dashboard-grid,
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
