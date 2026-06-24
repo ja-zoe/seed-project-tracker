@@ -22,16 +22,16 @@ import { CHART_COLORS } from "@/lib/format";
  * aggregated data computed on the server.
  */
 
-const AXIS = { stroke: "var(--text-body-subtle)", fontSize: 12 };
-const GRID = "rgba(43,43,38,0.10)";
+const AXIS = { stroke: "var(--text-faint)", fontSize: 12 };
+const GRID = "rgba(20,23,27,0.10)";
 
 function ChartTooltip({ active, payload, label, suffix }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass" style={{ borderRadius: 12, padding: "8px 12px", fontSize: 12 }}>
-      <p className="heading-text" style={{ fontWeight: 500, marginBottom: 2 }}>{label}</p>
+    <div style={{ borderRadius: 14, padding: "8px 12px", fontSize: 12, background: "var(--surface)", color: "var(--text-on-dark)", border: "1px solid var(--border-on-dark)", boxShadow: "var(--shadow-dark)" }}>
+      <p style={{ fontWeight: 500, marginBottom: 2, color: "var(--text-on-dark)" }}>{label}</p>
       {payload.map((p: any, i: number) => (
-        <p key={i} style={{ color: p.color ?? "var(--text-body)" }}>
+        <p key={i} style={{ color: p.color ?? "var(--text-on-dark-soft)" }}>
           {p.name}: {p.value}
           {suffix ?? ""}
         </p>
@@ -50,7 +50,7 @@ export function GoalCompletionChart({ data }: { data: { week: string; pct: numbe
         <XAxis dataKey="week" {...AXIS} tickLine={false} axisLine={false} />
         <YAxis domain={[0, 100]} {...AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
         <Tooltip content={<ChartTooltip suffix="%" />} />
-        <Line type="monotone" dataKey="pct" name="Goals met" stroke="#3a5a40" strokeWidth={2.5} dot={{ r: 3, fill: "#588157" }} />
+        <Line type="monotone" dataKey="pct" name="Goals met" stroke="#5f8a4e" strokeWidth={2.5} dot={{ r: 3, fill: "#a1b887" }} />
       </LineChart>
     </ResponsiveContainer>
   );

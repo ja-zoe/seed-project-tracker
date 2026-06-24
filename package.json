@@ -20,11 +20,18 @@
     "seed": "tsx prisma/seed.ts"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "prisma", "esbuild", "sharp"]
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "esbuild",
+      "sharp"
+    ]
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
     "@prisma/client": "^6.2.1",
+    "lucide-react": "^1.21.0",
     "next": "15.1.4",
     "next-auth": "5.0.0-beta.25",
     "react": "^19.0.0",

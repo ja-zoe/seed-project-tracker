@@ -3,13 +3,40 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  FolderKanban,
+  ListChecks,
+  CalendarClock,
+  Users,
+  ShieldCheck,
+  SlidersHorizontal,
+  Sprout,
+  Bell,
+  LogOut,
+  Menu,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+
+// Icon keys are passed from the server layout (functions can't cross the
+// server→client boundary), then resolved to lucide components here.
+const ICONS: Record<string, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  projects: FolderKanban,
+  actions: ListChecks,
+  review: CalendarClock,
+  users: Users,
+  roles: ShieldCheck,
+  settings: SlidersHorizontal,
+};
 
 export type NavItem = { href: string; label: string; icon: string };
 
 /**
- * App chrome: glass sidebar + top bar with a responsive (mobile) drawer.
- * Pure presentation — nav items are computed server-side from permissions and
- * passed in, so the sidebar only ever shows links the user is allowed to use.
+ * App chrome: a dark "bento" sidebar that anchors the layout against the sage
+ * background, with a responsive drawer on mobile. Nav items are computed
+ * server-side from permissions and passed in.
  */
 export function AppShell({
   groups,
@@ -31,23 +58,22 @@ export function AppShell({
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
 
   const sidebar = (
-    <nav className="glass" style={{ width: 256, height: "100%", borderRadius: 0 }} aria-label="Main">
-      <div style={{ padding: "16px 12px", display: "flex", flexDirection: "column", height: "100%" }}>
-        <Link href="/dashboard" className="nav-item" style={{ fontWeight: 600, marginBottom: 8 }} onClick={() => setOpen(false)}>
-          <span aria-hidden style={{ fontSize: 20 }}>🌱</span>
-          <span className="heading-text">SEED Tracker</span>
-        </Link>
+    <nav className="panel" style={{ width: 264, height: "100%", borderRadius: 0, padding: "20px 16px", display: "flex", flexDirection: "column", boxShadow: "none" }} aria-label="Main">
+      <Link href="/dashboard" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 8px 18px" }}>
+        <span style={{ display: "inline-flex", width: 34, height: 34, borderRadius: 12, background: "var(--primary)", color: "#14171b", alignItems: "center", justifyContent: "center" }}>
+          <Sprout size={19} />
+        </span>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "var(--text-on-dark)" }}>SEED Tracker</span>
+      </Link>
 
-        <div style={{ overflowY: "auto", flex: 1 }}>
-          {groups.map((g, gi) => (
-            <div key={gi} style={{ marginTop: gi === 0 ? 8 : 16 }}>
-              {g.heading && (
-                <p className="muted" style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", padding: "8px 12px 4px" }}>
-                  {g.heading}
-                </p>
-              )}
-              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
-                {g.items.map((item) => (
+      <div style={{ overflowY: "auto", flex: 1 }}>
+        {groups.map((g, gi) => (
+          <div key={gi} style={{ marginTop: gi === 0 ? 4 : 18 }}>
+            {g.heading && <p className="eyebrow" style={{ color: "var(--text-on-dark-soft)", padding: "0 12px 8px" }}>{g.heading}</p>}
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+              {g.items.map((item) => {
+                const Icon = ICONS[item.icon] ?? LayoutDashboard;
+                return (
                   <li key={item.href}>
                     <Link
                       href={item.href}
@@ -55,70 +81,70 @@ export function AppShell({
                       className={`nav-item ${isActive(item.href) ? "nav-item-active" : ""}`}
                       aria-current={isActive(item.href) ? "page" : undefined}
                     >
-                      <span aria-hidden style={{ width: 20, textAlign: "center" }}>{item.icon}</span>
+                      <Icon />
                       {item.label}
                     </Link>
                   </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
 
-        <div className="divider" style={{ margin: "12px 0" }} />
-        <div style={{ padding: "0 8px" }}>
-          <p className="heading-text" style={{ fontSize: 13, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {user.name ?? user.email}
-          </p>
-          <p className="muted" style={{ fontSize: 12 }}>{user.roleName ?? "No role"}</p>
-          <form action={signOutAction} style={{ marginTop: 10 }}>
-            <button type="submit" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "flex-start" }}>
-              ↩ Sign out
-            </button>
-          </form>
-        </div>
+      <div className="divider" style={{ margin: "14px 0" }} />
+      <div style={{ padding: "0 8px" }}>
+        <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-on-dark)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {user.name ?? user.email}
+        </p>
+        <p className="eyebrow" style={{ color: "var(--text-on-dark-soft)", marginTop: 2 }}>{user.roleName ?? "No role"}</p>
+        <form action={signOutAction} style={{ marginTop: 12 }}>
+          <button type="submit" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "flex-start", paddingLeft: 8 }}>
+            <LogOut /> Sign out
+          </button>
+        </form>
       </div>
     </nav>
   );
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
-      {/* Desktop sidebar */}
-      <aside className="hidden md:block" style={{ position: "sticky", top: 0, height: "100vh" }}>
-        {sidebar}
+      <aside className="hidden md:block" style={{ position: "sticky", top: 0, height: "100vh", padding: 12 }}>
+        <div className="panel" style={{ height: "100%", padding: 0, overflow: "hidden", borderRadius: 28 }}>{sidebar}</div>
       </aside>
 
       {/* Mobile drawer */}
       {open && (
         <div className="md:hidden" style={{ position: "fixed", inset: 0, zIndex: 40 }}>
-          <div onClick={() => setOpen(false)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)" }} />
+          <div onClick={() => setOpen(false)} style={{ position: "absolute", inset: 0, background: "rgba(20,23,27,0.5)" }} />
           <div style={{ position: "absolute", left: 0, top: 0, height: "100%" }}>{sidebar}</div>
         </div>
       )}
 
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-        <header
-          className="glass md:hidden"
-          style={{ borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", position: "sticky", top: 0, zIndex: 30 }}
-        >
-          <button className="btn btn-ghost btn-sm" onClick={() => setOpen(true)} aria-label="Open menu">☰</button>
-          <span className="heading-text" style={{ fontWeight: 600 }}>🌱 SEED Tracker</span>
-          <Link href="/notifications" className="btn btn-ghost btn-sm" aria-label="Notifications">
-            🔔{unreadCount > 0 ? ` ${unreadCount}` : ""}
+        <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", gap: 12 }}>
+          <button className="btn btn-secondary btn-icon md:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
+            <Menu />
+          </button>
+          <div style={{ flex: 1 }} />
+          <Link href="/notifications" className="btn btn-secondary btn-sm" aria-label="Notifications" style={{ position: "relative" }}>
+            <Bell />
+            <span className="hidden md:inline">Notifications</span>
+            {unreadCount > 0 && (
+              <span style={{ minWidth: 18, height: 18, padding: "0 5px", borderRadius: 9999, background: "var(--behind)", color: "#fff", fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                {unreadCount}
+              </span>
+            )}
           </Link>
         </header>
 
-        {/* Desktop top-right bell */}
-        <div className="hidden md:flex" style={{ justifyContent: "flex-end", padding: "16px 24px 0" }}>
-          <Link href="/notifications" className="btn btn-secondary btn-sm" aria-label="Notifications">
-            🔔 Notifications{unreadCount > 0 ? ` · ${unreadCount}` : ""}
-          </Link>
-        </div>
-
-        <main style={{ flex: 1, padding: "16px 24px 48px", maxWidth: 1200, width: "100%", margin: "0 auto" }}>
+        <main style={{ flex: 1, padding: "8px 24px 48px", maxWidth: 1240, width: "100%", margin: "0 auto" }}>
           {children}
         </main>
       </div>
     </div>
   );
 }
+
+// Re-export so the close icon is available if needed elsewhere.
+export { X as CloseIcon };

@@ -43,11 +43,12 @@ export const STATUS_BADGE_CLASS: Record<ProjectStatus, string> = {
   BEHIND: "badge-behind",
 };
 
-/** Earthy hex for charts (matches the status tokens in globals.css). */
+/** Status hex for charts (matches the status tokens in globals.css). */
 export const STATUS_CHART_COLOR: Record<ProjectStatus, string> = {
-  ON_TRACK: "#588157",
-  AT_RISK: "#c99846",
-  BEHIND: "#a4503c",
+  ON_TRACK: "#5f8a4e",
+  AT_RISK: "#c08a2b",
+  BEHIND: "#b1543c",
 };
 
-export const CHART_COLORS = ["#3a5a40", "#588157", "#a3b18a", "#6f4e37", "#b07156", "#c99846"];
+/** Eco-Tech series palette: sage / olive / earth. */
+export const CHART_COLORS = ["#5f8a4e", "#a1b887", "#b6cc9d", "#8c9680", "#c08a2b", "#b1543c"];

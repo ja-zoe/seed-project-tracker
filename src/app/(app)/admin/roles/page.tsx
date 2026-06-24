@@ -17,6 +17,7 @@ export default async function RolesPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Administration"
         title="Roles & permissions"
         description="Roles are data: tick the capabilities each role grants. The three built-ins are just pre-seeded roles you can tune."
       />

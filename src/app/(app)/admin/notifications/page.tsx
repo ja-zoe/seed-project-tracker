@@ -30,7 +30,7 @@ export default async function NotificationSettingsPage() {
 
   return (
     <>
-      <PageHeader title="Notifications & triggers" description="One place to manage the red-flag thresholds and every notification rule." />
+      <PageHeader eyebrow="Administration" title="Notifications & triggers" description="One place to manage the red-flag thresholds and every notification rule." />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {/* Red-flag thresholds (§5.3) */}
@@ -70,7 +70,7 @@ export default async function NotificationSettingsPage() {
           ) : (
             <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               {rules.map((r) => (
-                <li key={r.id} className="glass glass-card" style={{ padding: 14, display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center", opacity: r.enabled ? 1 : 0.55 }}>
+                <li key={r.id} className="panel-light" style={{ padding: 14, display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center", opacity: r.enabled ? 1 : 0.55 }}>
                   <div>
                     <p className="heading-text" style={{ fontWeight: 500 }}>{r.name}</p>
                     <p className="muted" style={{ fontSize: 12 }}>

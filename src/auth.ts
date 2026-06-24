@@ -1,14 +1,20 @@
 import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Permission } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/auth.config";
 import { isEmailAllowed } from "@/lib/env";
+import { netidToEmail, verifyHandoff } from "@/lib/cas";
 
 /**
  * Full Auth.js setup (Node.js runtime only — uses Prisma).
  *
- * - Google OAuth, restricted to the allowed email domain(s).
+ * Sign-in goes through Rutgers CAS (see src/lib/cas.ts). The CAS callback
+ * validates the ticket server-side and hands this Credentials provider a
+ * short-lived, signed "handoff" token; the provider verifies it and upserts the
+ * user. This keeps the rest of the app provider-agnostic.
+ *
  * - New users land as PENDING (schema default) until a PM approves them.
  * - The JWT carries an identity snapshot (id, status, role, permissions) so the
  *   middleware can authorize cheaply. Authoritative permission checks in server
@@ -17,10 +23,38 @@ import { isEmailAllowed } from "@/lib/env";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
+  providers: [
+    Credentials({
+      id: "cas",
+      name: "Rutgers CAS",
+      // The only input is a signed handoff token minted by the CAS callback
+      // after it validated the CAS ticket — never a raw NetID from the client.
+      credentials: { token: { label: "Handoff token", type: "text" } },
+      async authorize(credentials) {
+        const token = typeof credentials?.token === "string" ? credentials.token : null;
+        if (!token) return null;
+
+        const netid = verifyHandoff(token);
+        if (!netid) return null; // invalid / expired / forged
+
+        const email = netidToEmail(netid);
+        if (!isEmailAllowed(email)) return null;
+
+        // Upsert the user. New users default to PENDING (schema); the PM admin
+        // is pre-activated by the seed. We don't overwrite existing status/role.
+        const user = await prisma.user.upsert({
+          where: { email },
+          update: {},
+          create: { email, name: netid },
+        });
+        return { id: user.id, email: user.email, name: user.name };
+      },
+    }),
+  ],
   callbacks: {
     ...authConfig.callbacks,
 
-    /** Enforce the Rutgers email-domain restriction at sign-in. */
+    /** Defense-in-depth: re-check the Rutgers domain restriction at sign-in. */
     async signIn({ user }) {
       return isEmailAllowed(user.email);
     },

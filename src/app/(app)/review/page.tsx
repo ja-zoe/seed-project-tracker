@@ -58,7 +58,7 @@ export default async function ReviewPage() {
 
   return (
     <>
-      <PageHeader title="Monthly review" description="The four monthly questions, auto-answered from this semester's data." />
+      <PageHeader eyebrow="Insights" title="Monthly review" description="The four monthly questions, auto-answered from this semester's data." />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 20 }}>
         <StatCard label="Projects" value={projects.length} />
@@ -70,7 +70,7 @@ export default async function ReviewPage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
         <Section title="Q1 · Missed goals multiple weeks in a row">
           {missedStreaks.length === 0 ? (
-            <p className="muted" style={{ fontSize: 14 }}>No project has missed its goal 2+ weeks running. 🌱</p>
+            <p className="muted" style={{ fontSize: 14 }}>No project has missed its goal 2+ weeks running.</p>
           ) : (
             <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               {missedStreaks.map((p) => (
@@ -93,7 +93,7 @@ export default async function ReviewPage() {
 
         <Section title="Q4 · Projects that may need a priority shift">
           {priorityShift.length === 0 ? (
-            <p className="muted" style={{ fontSize: 14 }}>Everything is on track. 🌳</p>
+            <p className="muted" style={{ fontSize: 14 }}>Everything is on track.</p>
           ) : (
             <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               {priorityShift.map((p) => (

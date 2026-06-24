@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Bell, Check } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { fmtDateTime } from "@/lib/format";
@@ -18,6 +19,7 @@ export default async function NotificationsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Inbox"
         title="Notifications"
         actions={
           hasUnread ? (
@@ -29,7 +31,7 @@ export default async function NotificationsPage() {
       />
 
       {notifications.length === 0 ? (
-        <EmptyState icon="🔔" title="No notifications" description="Reminders and alerts will appear here." />
+        <EmptyState icon={<Bell size={24} />} title="No notifications" description="Reminders and alerts will appear here." />
       ) : (
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
           {notifications.map((n) => {
@@ -44,14 +46,14 @@ export default async function NotificationsPage() {
               </>
             );
             return (
-              <li key={n.id} className="glass glass-card" style={{ padding: 16, opacity: n.read ? 0.7 : 1 }}>
+              <li key={n.id} className="panel-light" style={{ padding: 16, opacity: n.read ? 0.7 : 1 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
                   <div style={{ flex: 1 }}>
                     {n.link ? <Link href={n.link} style={{ display: "block" }}>{inner}</Link> : inner}
                   </div>
                   {!n.read && (
                     <form action={markRead.bind(null, n.id)}>
-                      <button className="btn btn-ghost btn-sm" aria-label="Mark read">✓</button>
+                      <button className="btn btn-ghost btn-icon btn-sm" aria-label="Mark read"><Check size={16} /></button>
                     </form>
                   )}
                 </div>

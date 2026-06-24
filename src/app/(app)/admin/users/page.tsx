@@ -46,7 +46,7 @@ export default async function UsersPage() {
 
   return (
     <>
-      <PageHeader title="Users" description="Approve new members, assign roles, and manage project assignments." />
+      <PageHeader eyebrow="Administration" title="Users" description="Approve new members, assign roles, and manage project assignments." />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         <Section title={`Pending approval · ${pending.length}`}>
@@ -55,7 +55,7 @@ export default async function UsersPage() {
           ) : (
             <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
               {pending.map((u) => (
-                <li key={u.id} className="glass glass-card" style={{ padding: 14, display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                <li key={u.id} className="panel-light" style={{ padding: 14, display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
                   <div>
                     <p className="heading-text" style={{ fontWeight: 500 }}>{u.name ?? u.email}</p>
                     <p className="muted" style={{ fontSize: 12 }}>{u.email} · joined {fmtDate(u.createdAt)}</p>
@@ -82,7 +82,7 @@ export default async function UsersPage() {
               {active.map((u) => {
                 const assignedIds = new Set(u.assignments.map((a) => a.projectId));
                 return (
-                  <div key={u.id} className="glass glass-card" style={{ padding: 16 }}>
+                  <div key={u.id} className="panel-light" style={{ padding: 16 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
                       <div>
                         <p className="heading-text" style={{ fontWeight: 500 }}>

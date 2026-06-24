@@ -16,16 +16,17 @@ export default async function ProjectsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Portfolio"
         title="Projects"
         description="Every project you can see. Leads can edit their own; the rest is read-only."
-        actions={canCreate ? <LinkButton href="/projects/new" variant="brand">+ New project</LinkButton> : null}
+        actions={canCreate ? <LinkButton href="/projects/new" variant="primary">+ New project</LinkButton> : null}
       />
 
       {projects.length === 0 ? (
         <EmptyState
           title="No projects yet"
           description={canCreate ? "Create the first project to begin tracking the semester." : "You haven't been assigned to a project yet."}
-          action={canCreate ? <LinkButton href="/projects/new" variant="brand">+ New project</LinkButton> : undefined}
+          action={canCreate ? <LinkButton href="/projects/new" variant="primary">+ New project</LinkButton> : undefined}
         />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
@@ -33,7 +34,7 @@ export default async function ProjectsPage() {
             const mp = milestoneProgress(p.milestones);
             const leads = p.assignments.map((a) => a.user.name ?? a.user.email).join(", ");
             return (
-              <Link key={p.id} href={`/projects/${p.id}`} className="glass glass-card glass-card-interactive" style={{ display: "block" }}>
+              <Link key={p.id} href={`/projects/${p.id}`} className="panel-light lift" style={{ display: "block" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
                   <h3 style={{ fontSize: 18, margin: 0 }}>{p.name}</h3>
                   <StatusBadge status={p.status} />

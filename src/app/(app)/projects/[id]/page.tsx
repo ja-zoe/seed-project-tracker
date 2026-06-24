@@ -6,6 +6,7 @@ import { can, canEditProject } from "@/lib/permissions";
 import { canViewProject, isAssignedTo } from "@/lib/queries";
 import { milestoneProgress } from "@/lib/stats";
 import { fmtDate, fmtDateTime, fmtDeadline, STATUS_LABEL } from "@/lib/format";
+import { Flag, CheckCircle2, Circle, Trash2, CheckCheck } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Section, ProgressBar, EmptyState } from "@/components/ui";
 import { StatusUpdateForm, TrackingForm, SubmitButton } from "@/components/forms";
@@ -70,8 +71,9 @@ export default async function ProjectDetailPage({
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap", marginBottom: 8 }}>
         <div>
-          <h1 style={{ marginBottom: 6 }}>{project.name}</h1>
-          <p className="muted">{project.semester} · {leads.length ? `Led by ${leads.map((l) => l.name ?? l.email).join(", ")}` : "No leads assigned"}</p>
+          <p className="eyebrow" style={{ marginBottom: 8 }}>{project.semester}</p>
+          <h1 className="display" style={{ marginBottom: 6 }}>{project.name}</h1>
+          <p className="muted">{leads.length ? `Led by ${leads.map((l) => l.name ?? l.email).join(", ")}` : "No leads assigned"}</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <StatusBadge status={project.status} />
@@ -81,13 +83,13 @@ export default async function ProjectDetailPage({
       {project.description && <p style={{ maxWidth: 720, marginBottom: 16 }}>{project.description}</p>}
 
       {/* Toast-ish confirmations */}
-      {sp.submitted && <Banner kind="success">Status update submitted. ✓</Banner>}
-      {sp.tracked && <Banner kind="success">Meeting tracking saved. ✓</Banner>}
+      {sp.submitted && <Banner>Status update submitted.</Banner>}
+      {sp.tracked && <Banner>Meeting tracking saved.</Banner>}
 
       {/* Red-flag corrective action plan (§5.3) */}
       {project.status === "BEHIND" && (
-        <div className="glass glass-card" style={{ borderColor: "var(--status-behind)", marginBottom: 20 }}>
-          <h2 style={{ fontSize: 18, color: "var(--status-behind)" }}>🚩 Corrective action plan required</h2>
+        <div className="panel-light" style={{ borderColor: "var(--behind)", marginBottom: 20 }}>
+          <h2 style={{ fontSize: 18, color: "var(--behind)", display: "flex", alignItems: "center", gap: 8 }}><Flag size={18} /> Corrective action plan required</h2>
           <p className="muted" style={{ marginTop: 4 }}>This project is flagged Behind. Document how it will get back on track.</p>
           {canEdit ? (
             <form action={savePlan} style={{ marginTop: 12 }}>
@@ -104,7 +106,7 @@ export default async function ProjectDetailPage({
 
       {/* Status override controls */}
       {canEdit && (
-        <div className="glass glass-card" style={{ marginBottom: 20 }}>
+        <div className="panel-light" style={{ marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
             <div>
               <h2 style={{ fontSize: 16, margin: 0 }}>Status</h2>
@@ -145,12 +147,14 @@ export default async function ProjectDetailPage({
                     <li key={m.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       {canEdit ? (
                         <form action={toggleMilestone.bind(null, m.id)}>
-                          <button className="btn btn-ghost btn-sm" aria-label="Toggle milestone" style={{ padding: 4 }}>
-                            {m.completed ? "☑" : "☐"}
+                          <button className="btn btn-ghost btn-icon btn-sm" aria-label="Toggle milestone" style={{ color: m.completed ? "var(--on-track)" : "var(--text-faint)" }}>
+                            {m.completed ? <CheckCircle2 size={18} /> : <Circle size={18} />}
                           </button>
                         </form>
                       ) : (
-                        <span aria-hidden>{m.completed ? "☑" : "☐"}</span>
+                        <span aria-hidden style={{ color: m.completed ? "var(--on-track)" : "var(--text-faint)", display: "inline-flex", padding: 8 }}>
+                          {m.completed ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                        </span>
                       )}
                       <div style={{ flex: 1 }}>
                         <span className="heading-text" style={{ textDecoration: m.completed ? "line-through" : "none" }}>{m.title}</span>
@@ -161,7 +165,7 @@ export default async function ProjectDetailPage({
                       </div>
                       {canEdit && (
                         <form action={deleteMilestone.bind(null, m.id)}>
-                          <button className="btn btn-ghost btn-sm muted" aria-label="Delete milestone" style={{ padding: 4 }}>✕</button>
+                          <button className="btn btn-ghost btn-icon btn-sm faint" aria-label="Delete milestone"><Trash2 size={15} /></button>
                         </form>
                       )}
                     </li>
@@ -189,10 +193,10 @@ export default async function ProjectDetailPage({
                     <li key={a.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, opacity: a.status === "DONE" ? 0.6 : 1 }}>
                       {canToggle ? (
                         <form action={toggleActionItem.bind(null, a.id)}>
-                          <button className="btn btn-ghost btn-sm" aria-label="Toggle action item" style={{ padding: 4 }}>{a.status === "DONE" ? "☑" : "☐"}</button>
+                          <button className="btn btn-ghost btn-icon btn-sm" aria-label="Toggle action item" style={{ color: a.status === "DONE" ? "var(--on-track)" : "var(--text-faint)" }}>{a.status === "DONE" ? <CheckCircle2 size={18} /> : <Circle size={18} />}</button>
                         </form>
                       ) : (
-                        <span aria-hidden style={{ padding: 4 }}>{a.status === "DONE" ? "☑" : "☐"}</span>
+                        <span aria-hidden style={{ color: a.status === "DONE" ? "var(--on-track)" : "var(--text-faint)", display: "inline-flex", padding: 8 }}>{a.status === "DONE" ? <CheckCircle2 size={18} /> : <Circle size={18} />}</span>
                       )}
                       <div style={{ flex: 1 }}>
                         <p className="heading-text" style={{ textDecoration: a.status === "DONE" ? "line-through" : "none" }}>{a.description}</p>
@@ -203,7 +207,7 @@ export default async function ProjectDetailPage({
                       </div>
                       {canAssign && (
                         <form action={deleteActionItem.bind(null, a.id)}>
-                          <button className="btn btn-ghost btn-sm muted" aria-label="Delete action item" style={{ padding: 4 }}>✕</button>
+                          <button className="btn btn-ghost btn-icon btn-sm faint" aria-label="Delete action item"><Trash2 size={15} /></button>
                         </form>
                       )}
                     </li>
@@ -304,11 +308,12 @@ function HistoryRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Banner({ kind, children }: { kind: "success"; children: React.ReactNode }) {
-  const color = kind === "success" ? "var(--status-on-track)" : "var(--status-behind)";
+function Banner({ children }: { children: React.ReactNode }) {
   return (
-    <div className="glass glass-card" style={{ borderColor: color, marginBottom: 16, padding: 12 }}>
-      <span style={{ color }}>{children}</span>
+    <div className="panel-light" style={{ borderColor: "var(--on-track)", marginBottom: 16, padding: 12 }}>
+      <span style={{ color: "var(--on-track)", display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14 }}>
+        <CheckCheck size={16} /> {children}
+      </span>
     </div>
   );
 }

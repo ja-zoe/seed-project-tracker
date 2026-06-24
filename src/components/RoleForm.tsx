@@ -63,7 +63,7 @@ export function RoleForm({
         <legend className="label">Permissions</legend>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14, marginTop: 4 }}>
           {[...groups.entries()].map(([group, perms]) => (
-            <div key={group} className="glass glass-card" style={{ padding: 14 }}>
+            <div key={group} className="panel-light" style={{ padding: 14 }}>
               <p className="heading-text" style={{ fontWeight: 500, fontSize: 13, marginBottom: 8 }}>{group}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {perms.map((p) => (

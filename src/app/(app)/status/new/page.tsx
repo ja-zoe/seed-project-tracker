@@ -19,11 +19,11 @@ export default async function NewStatusPage() {
 
   return (
     <>
-      <PageHeader title="Submit status update" description="Your weekly pre-meeting check-in." />
+      <PageHeader eyebrow="Weekly check-in" title="Submit status update" description="Your weekly pre-meeting check-in." />
       {projects.length === 0 ? (
         <EmptyState title="No projects to submit for" description="You aren't assigned to a project yet. Ask the PM to add you." />
       ) : (
-        <div className="glass glass-card" style={{ maxWidth: 680 }}>
+        <div className="panel-light" style={{ maxWidth: 680 }}>
           <StatusUpdateForm action={submitStatusUpdate} projects={projects} />
         </div>
       )}

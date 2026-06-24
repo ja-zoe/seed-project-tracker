@@ -17,8 +17,8 @@ export default async function NewProjectPage() {
 
   return (
     <>
-      <PageHeader title="New project" description="Define a project and assign its lead(s)." />
-      <form action={createProject} className="glass glass-card" style={{ maxWidth: 640, display: "flex", flexDirection: "column", gap: 16 }}>
+      <PageHeader eyebrow="Create" title="New project" description="Define a project and assign its lead(s)." />
+      <form action={createProject} className="panel-light" style={{ maxWidth: 640, display: "flex", flexDirection: "column", gap: 16 }}>
         <div>
           <label className="label" htmlFor="name">Project name</label>
           <input id="name" name="name" className="input" required placeholder="e.g. Campus Solar Garden" />

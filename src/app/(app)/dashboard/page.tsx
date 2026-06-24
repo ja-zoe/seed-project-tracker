@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Flag } from "lucide-react";
 import { Permission } from "@prisma/client";
 import { requireUser } from "@/lib/session";
 import { can } from "@/lib/permissions";
@@ -43,6 +44,7 @@ export default async function DashboardPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Overview"
         title={`Welcome, ${user.name?.split(" ")[0] ?? "there"}`}
         description={
           manager
@@ -51,25 +53,25 @@ export default async function DashboardPage() {
         }
         actions={
           can(user, Permission.SUBMIT_STATUS_UPDATES) ? (
-            <LinkButton href="/status/new" variant="brand">
+            <LinkButton href="/status/new" variant="primary">
               + Submit status update
             </LinkButton>
           ) : null
         }
       />
 
-      {/* Stat row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 20 }}>
-        <StatCard label="Projects" value={projects.length} />
-        <StatCard label="On track" value={projects.filter((p) => p.status === "ON_TRACK").length} />
-        <StatCard label="At risk" value={atRisk.length} />
-        <StatCard label="Behind" value={flagged.length} hint={flagged.length ? "Needs a corrective plan" : undefined} />
+      {/* Stat row — dark focal card leads, colored metrics for risk/behind */}
+      <div className="reveal reveal-1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 20 }}>
+        <StatCard label="Projects" value={projects.length} dark />
+        <StatCard label="On track" value={projects.filter((p) => p.status === "ON_TRACK").length} accent="var(--on-track)" />
+        <StatCard label="At risk" value={atRisk.length} accent="var(--at-risk)" />
+        <StatCard label="Behind" value={flagged.length} accent="var(--behind)" hint={flagged.length ? "Needs a corrective plan" : undefined} />
       </div>
 
       {/* Red-flag banner */}
       {flagged.length > 0 && (
-        <div className="glass glass-card" style={{ borderColor: "var(--status-behind)", marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, color: "var(--status-behind)" }}>🚩 {flagged.length} project(s) flagged Behind</h2>
+        <div className="panel-light" style={{ borderColor: "var(--behind)", marginBottom: 20 }}>
+          <h2 style={{ fontSize: 16, color: "var(--behind)", display: "flex", alignItems: "center", gap: 8 }}><Flag size={17} /> {flagged.length} project(s) flagged Behind</h2>
           <ul style={{ margin: "8px 0 0", paddingLeft: 18 }}>
             {flagged.map((p) => (
               <li key={p.id} style={{ marginBottom: 4 }}>
@@ -93,7 +95,7 @@ export default async function DashboardPage() {
             <EmptyState
               title="No projects yet"
               description={manager ? "Create your first project to start tracking the semester." : "You haven't been assigned to a project yet."}
-              action={manager ? <LinkButton href="/projects/new" variant="brand">+ New project</LinkButton> : undefined}
+              action={manager ? <LinkButton href="/projects/new" variant="primary">+ New project</LinkButton> : undefined}
             />
           ) : (
             <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -101,7 +103,7 @@ export default async function DashboardPage() {
                 const mp = milestoneProgress(p.milestones);
                 return (
                   <li key={p.id}>
-                    <Link href={`/projects/${p.id}`} className="glass glass-card glass-card-interactive" style={{ display: "block", padding: 16 }}>
+                    <Link href={`/projects/${p.id}`} className="panel-light lift" style={{ display: "block", padding: 16 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                         <span className="heading-text" style={{ fontWeight: 500 }}>{p.name}</span>
                         <StatusBadge status={p.status} />
@@ -127,7 +129,7 @@ export default async function DashboardPage() {
           {/* My action items */}
           <Section title="My open action items">
             {myActionItems.length === 0 ? (
-              <p className="muted" style={{ fontSize: 14 }}>Nothing assigned to you. 🌱</p>
+              <p className="muted" style={{ fontSize: 14 }}>Nothing assigned to you right now.</p>
             ) : (
               <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
                 {myActionItems.map((a) => (

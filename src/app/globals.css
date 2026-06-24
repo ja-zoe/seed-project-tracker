@@ -1,396 +1,343 @@
 /* ==========================================================================
-   SEED Project Tracker — design system
-   Forest / earthy palette (from the project outline §10) mapped onto the
-   glassmorphism technique (blur, translucent borders, edge highlights, glass
-   shadows) from the glassmorphism design skill.
+   SEED Project Tracker — "Eco-Tech Dashboard" design system
+   (from claude/eco-tech-dashboard-DESIGN.md)
 
-   Design-system rule honored here: tokens are agnostic CSS custom properties,
-   NOT Tailwind classes. Component classes below implement the mapping. Dark
-   mode is automatic via prefers-color-scheme — values never swapped manually.
+   Editorial eco-tech: a soft sage background, dark charcoal "bento" panels with
+   light text for metric emphasis, lighter panels for dense data, big Gloock
+   display serifs, JetBrains Mono technical labels, and Inter body copy.
+   Deliberate spacing, large radii, restrained hover-lift / reveal motion.
+   Single light-anchored theme (the source does not swap color modes).
    ========================================================================== */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ---- Tokens: light mode (default) --------------------------------------- */
 :root {
-  /* Backgrounds — warm paper white / misty sage */
-  --bg-base: #f4f1ea;
-  --bg-alt: #dce3d5;
-  --surface: #fbfaf6; /* near-solid panel for dense tables where readability matters */
+  /* Core palette */
+  --bg: #ced1c3;            /* sage background */
+  --bg-deep: #c2c6b6;       /* slightly deeper sage for ambient depth */
+  --surface: #191c21;       /* dark panel (bento focal surfaces) */
+  --surface-2: #21262d;     /* nested dark surface */
+  --card: #eceee4;          /* light panel (dense content, readability) */
+  --card-2: #f5f6ef;        /* lighter nested light panel */
+  --primary: #b6cc9d;       /* sage green */
+  --accent: #a1b887;        /* olive accent */
+  --cta: #14171b;           /* near-black CTA on light bg */
 
-  /* Text — warm charcoal, never pure black */
-  --text-heading: #2b2b26;
-  --text-body: #545049;
-  --text-body-subtle: #76726a;
+  /* Text */
+  --text: #111827;          /* primary on light */
+  --text-soft: #4b5563;     /* secondary on light */
+  --text-faint: #6b7280;
+  --text-on-dark: #ecefe4;  /* primary on dark surface */
+  --text-on-dark-soft: #a7b09c;
 
-  /* Greens */
-  --brand: #3a5a40; /* forest/pine — primary */
-  --brand-strong: #2e4034;
-  --brand-soft: #e8efe4;
-  --moss: #588157;
-  --sage: #a3b18a;
+  /* Borders */
+  --border: #8c9680;
+  --border-soft: rgba(140, 150, 128, 0.34);
+  --border-on-dark: rgba(236, 239, 228, 0.12);
 
-  /* Earth accents (used sparingly) */
-  --bark: #6f4e37;
-  --clay: #b07156;
+  /* Status — earthy, distinct, harmonized with the palette */
+  --on-track: #5f8a4e;
+  --at-risk: #c08a2b;
+  --behind: #b1543c;
+  --on-track-tint: rgba(95, 138, 78, 0.16);
+  --at-risk-tint: rgba(192, 138, 43, 0.16);
+  --behind-tint: rgba(177, 84, 60, 0.16);
 
-  /* Project-health status (earthy, not traffic-light) */
-  --status-on-track: #588157; /* moss */
-  --status-at-risk: #c99846; /* muted ochre */
-  --status-behind: #a4503c; /* clay red */
-  --status-on-track-bg: rgba(88, 129, 87, 0.14);
-  --status-at-risk-bg: rgba(201, 152, 70, 0.16);
-  --status-behind-bg: rgba(164, 80, 60, 0.15);
+  /* Fonts (wired to next/font variables in layout.tsx) */
+  --font-display: var(--font-gloock), "Gloock", Georgia, serif;
+  --font-body: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono-jb), "JetBrains Mono", ui-monospace, monospace;
 
-  /* Focus ring */
-  --ring: rgba(58, 90, 64, 0.35);
+  /* Radius */
+  --r-card: 32px;
+  --r-control: 30px;
+  --r-field: 18px;
+  --r-pill: 9999px;
 
-  /* Glass surfaces (tinted by the earthy backdrop) */
-  --glass-bg: rgba(255, 255, 255, 0.45);
-  --glass-bg-hover: rgba(255, 255, 255, 0.58);
-  --glass-border: rgba(43, 43, 38, 0.10);
-  --glass-border-subtle: rgba(43, 43, 38, 0.06);
-  --glass-shadow: 0 8px 32px rgba(43, 43, 38, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(255, 255, 255, 0.15);
-  --glass-edge-top: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
-  --glass-edge-left: linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent, rgba(255, 255, 255, 0.2));
-
-  --font-sans: var(--font-inter), "Google Sans", system-ui, -apple-system, sans-serif;
-  --shadow-xs: 0 1px 2px rgba(43, 43, 38, 0.08);
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(20, 23, 27, 0.06);
+  --shadow-md: 0 18px 40px -24px rgba(20, 23, 27, 0.45);
+  --shadow-dark: 0 24px 60px -28px rgba(0, 0, 0, 0.55);
 }
 
-/* ---- Tokens: dark mode (deep forest / charcoal-green) ------------------- */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-base: #1e2a22;
-    --bg-alt: #26332b;
-    --surface: #243029;
-
-    --text-heading: #eceae0;
-    --text-body: #b9c0b1;
-    --text-body-subtle: #8f978a;
-
-    --brand: #7faa7a; /* lighter on dark for contrast */
-    --brand-strong: #a3b18a;
-    --brand-soft: rgba(127, 170, 122, 0.16);
-    --moss: #7faa7a;
-    --sage: #a3b18a;
-
-    --bark: #a98a6f;
-    --clay: #cd8a72;
-
-    --status-on-track: #7faa7a;
-    --status-at-risk: #d8ad63;
-    --status-behind: #cd8a72;
-    --status-on-track-bg: rgba(127, 170, 122, 0.18);
-    --status-at-risk-bg: rgba(216, 173, 99, 0.18);
-    --status-behind-bg: rgba(205, 138, 114, 0.18);
-
-    --ring: rgba(127, 170, 122, 0.4);
-
-    --glass-bg: rgba(255, 255, 255, 0.08);
-    --glass-bg-hover: rgba(255, 255, 255, 0.13);
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --glass-border-subtle: rgba(255, 255, 255, 0.06);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
-    --glass-edge-top: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
-    --glass-edge-left: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent, rgba(255, 255, 255, 0.05));
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  }
-}
-
-/* ---- Base ---------------------------------------------------------------- */
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  padding: 0;
-  margin: 0;
-}
+* { box-sizing: border-box; }
+html, body { padding: 0; margin: 0; }
 
 body {
-  font-family: var(--font-sans);
-  color: var(--text-body);
-  background-color: var(--bg-base);
-  /* Subtle organic depth: soft light "filtering through trees" + barely-there
-     topographic contour lines behind the glass. Felt, not noticed. */
+  font-family: var(--font-body);
+  color: var(--text);
+  background-color: var(--bg);
+  /* Ambient organic light — supporting layers behind the content, kept subtle. */
   background-image:
-    radial-gradient(1100px 700px at 12% -10%, rgba(163, 177, 138, 0.28), transparent 60%),
-    radial-gradient(900px 600px at 100% 0%, rgba(88, 129, 87, 0.16), transparent 55%),
-    repeating-linear-gradient(
-      115deg,
-      rgba(43, 43, 38, 0.018) 0px,
-      rgba(43, 43, 38, 0.018) 1px,
-      transparent 1px,
-      transparent 26px
-    );
+    radial-gradient(1200px 760px at 8% -8%, rgba(182, 204, 157, 0.55), transparent 58%),
+    radial-gradient(1000px 680px at 108% 4%, rgba(161, 184, 135, 0.40), transparent 55%),
+    radial-gradient(760px 760px at 92% 110%, rgba(140, 150, 128, 0.30), transparent 60%);
   background-attachment: fixed;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Headings — medium weight, heading color, scale per typography.md */
-h1, h2, h3, h4, h5, h6 {
-  color: var(--text-heading);
+/* ---- Type scale -------------------------------------------------------- */
+h1, h2, h3, h4, h5, h6 { color: var(--text); margin: 0 0 0.4em; font-weight: 500; line-height: 1.1; }
+
+.display {
+  font-family: var(--font-display);
   font-weight: 500;
-  margin: 0 0 0.5em;
-  line-height: 1.2;
+  letter-spacing: -0.01em;
+  line-height: 1.04;
+  color: var(--text);
 }
-h1 { font-size: 32px; letter-spacing: -0.4px; }
-h2 { font-size: 26px; }
-h3 { font-size: 22px; }
-h4 { font-size: 20px; }
-h5 { font-size: 18px; }
-h6 { font-size: 16px; }
-@media (min-width: 1024px) {
-  h1 { font-size: 44px; }
-  h2 { font-size: 34px; }
-  h3 { font-size: 28px; }
-}
+h1.display { font-size: clamp(34px, 5vw, 60px); }
+h2.display { font-size: clamp(26px, 3.4vw, 40px); }
 
+h1 { font-size: clamp(28px, 4vw, 40px); }
+h2 { font-size: 26px; }
+h3 { font-size: 20px; }
+h4 { font-size: 18px; }
+
+p { line-height: 1.6; }
 a { color: inherit; text-decoration: none; }
 
+/* Technical eyebrow / metadata label — JetBrains Mono, uppercase. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.mono { font-family: var(--font-mono); }
+
 /* ==========================================================================
-   Glass surfaces
+   Panels (bento surfaces)
    ========================================================================== */
 
-/* Generic glass surface. Always force backdrop-filter so Tailwind/base resets
-   can't override it (per the design skill). */
-.glass {
+/* Dark focal panel — metric emphasis, hero, feature blocks. */
+.panel {
   position: relative;
-  overflow: hidden;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-}
-
-/* Edge highlights — light refraction along the top and left edges. */
-.glass::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: var(--glass-edge-top);
-  pointer-events: none;
-}
-.glass::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0;
-  width: 1px; height: 100%;
-  background: var(--glass-edge-left);
-  pointer-events: none;
-}
-
-.glass-card {
-  border-radius: 20px;
-  padding: 20px;
-}
-
-/* Interactive (clickable) card — only these get a hover change. */
-.glass-card-interactive {
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-.glass-card-interactive:hover {
-  background: var(--glass-bg-hover);
-}
-
-/* Near-solid surface for dense data tables (readability over translucency). */
-.solid-card {
-  position: relative;
-  border-radius: 20px;
   background: var(--surface);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-xs);
+  color: var(--text-on-dark);
+  border: 1px solid var(--border-on-dark);
+  border-radius: var(--r-card);
+  padding: 24px;
+  box-shadow: var(--shadow-dark);
 }
+.panel h1, .panel h2, .panel h3, .panel h4 { color: var(--text-on-dark); }
+.panel .eyebrow { color: var(--accent); }
+.panel .muted { color: var(--text-on-dark-soft); }
+
+/* Light panel — dense content, lists, tables, forms. */
+.panel-light {
+  position: relative;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-card);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+/* Nested inner surface inside a light panel */
+.inset {
+  background: var(--card-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+}
+/* Nested inner surface inside a dark panel */
+.panel .inset { background: var(--surface-2); border-color: var(--border-on-dark); }
+
+/* Hover lift for interactive panels/links */
+.lift { transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease; }
+.lift:hover { transform: translateY(-3px); }
 
 /* ==========================================================================
-   Buttons (buttons.md) — glint effect on solid variants
+   Buttons — pill/control radius, context-aware on dark panels
    ========================================================================== */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 14px;
   line-height: 1;
-  padding: 10px 16px;
-  border-radius: 20px;
+  padding: 11px 20px;
+  border-radius: var(--r-control);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease, opacity 150ms ease;
-  box-sizing: border-box;
-  text-align: center;
+  transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+  white-space: nowrap;
 }
-.btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 4px var(--ring);
-}
-.btn:disabled,
-.btn[aria-disabled="true"] {
-  cursor: not-allowed;
-  opacity: 0.55;
-  box-shadow: none;
-}
-.btn-sm { padding: 8px 12px; font-size: 13px; }
-.btn-lg { padding: 12px 20px; font-size: 16px; }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(95, 138, 78, 0.45); }
+.btn:disabled, .btn[aria-disabled="true"] { cursor: not-allowed; opacity: 0.5; }
+.btn svg { width: 16px; height: 16px; }
+.btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn-sm svg { width: 15px; height: 15px; }
+.btn-lg { padding: 14px 26px; font-size: 15px; }
+.btn-icon { padding: 8px; border-radius: var(--r-pill); }
 
-/* Glint: base shadow + inset top highlight + soft outer glow. */
-.btn-brand, .btn-secondary, .btn-success, .btn-danger, .btn-warning {
-  box-shadow: var(--shadow-xs), inset rgba(255, 255, 255, 0.3) 0 6px 0 -5px,
-    rgba(0, 0, 0, 0.08) 0 4px 10px -5px;
-}
-.btn-brand {
-  background: var(--brand);
-  color: #fff;
-}
-.btn-brand:hover { background: var(--brand-strong); }
+/* Primary CTA — dark pill on the light background */
+.btn-primary { background: var(--cta); color: #fff; }
+.btn-primary:hover { background: #000; }
 
-.btn-secondary {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-color: var(--glass-border);
-  color: var(--text-body);
-}
-.btn-secondary:hover { background: var(--glass-bg-hover); color: var(--text-heading); }
+/* Accent — sage chip */
+.btn-accent { background: var(--primary); color: #14171b; }
+.btn-accent:hover { background: var(--accent); }
 
-.btn-ghost {
-  background: transparent;
-  color: var(--text-heading);
-}
-.btn-ghost:hover { background: var(--glass-bg-hover); }
+/* Secondary — outlined on light */
+.btn-secondary { background: transparent; color: var(--text); border-color: var(--border); }
+.btn-secondary:hover { background: rgba(20, 23, 27, 0.05); }
 
-.btn-danger { background: var(--status-behind); color: #fff; }
-.btn-danger:hover { filter: brightness(0.92); }
-.btn-success { background: var(--status-on-track); color: #fff; }
-.btn-success:hover { filter: brightness(0.92); }
-.btn-warning { background: var(--status-at-risk); color: #2b2b26; }
-.btn-warning:hover { filter: brightness(0.95); }
+.btn-ghost { background: transparent; color: var(--text); }
+.btn-ghost:hover { background: rgba(20, 23, 27, 0.06); }
+
+.btn-danger { background: var(--behind); color: #fff; }
+.btn-danger:hover { filter: brightness(0.93); }
+.btn-success { background: var(--on-track); color: #fff; }
+.btn-success:hover { filter: brightness(0.93); }
+
+/* Context inversion: on dark panels the primary action becomes the sage chip,
+   and secondary/ghost adopt light-on-dark treatments. */
+.panel .btn-primary { background: var(--primary); color: #14171b; }
+.panel .btn-primary:hover { background: var(--accent); }
+.panel .btn-secondary { color: var(--text-on-dark); border-color: var(--border-on-dark); }
+.panel .btn-secondary:hover { background: rgba(236, 239, 228, 0.08); }
+.panel .btn-ghost { color: var(--text-on-dark); }
+.panel .btn-ghost:hover { background: rgba(236, 239, 228, 0.08); }
 
 /* ==========================================================================
-   Inputs (inputs.md)
+   Inputs
    ========================================================================== */
-.label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-heading);
-  margin-bottom: 8px;
-}
-.input,
-.textarea,
-.select {
+.label { display: block; font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-soft); margin-bottom: 8px; }
+.input, .textarea, .select {
   display: block;
   width: 100%;
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-size: 14px;
-  color: var(--text-heading);
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: var(--shadow-xs);
-  transition: all 200ms ease;
+  color: var(--text);
+  padding: 11px 14px;
+  border-radius: var(--r-field);
+  border: 1px solid var(--border);
+  background: var(--card-2);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
 }
-.textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
-.input::placeholder,
-.textarea::placeholder { color: var(--text-body-subtle); }
-.input:focus,
-.textarea:focus,
-.select:focus {
-  outline: none;
-  border-color: var(--brand);
-  box-shadow: 0 0 0 1px var(--brand);
-}
-.input:disabled,
-.textarea:disabled,
-.select:disabled { opacity: 0.6; cursor: not-allowed; }
-.input-error { border-color: var(--status-behind); }
+.textarea { min-height: 104px; resize: vertical; line-height: 1.5; }
+.input::placeholder, .textarea::placeholder { color: var(--text-faint); }
+.input:focus, .textarea:focus, .select:focus { outline: none; border-color: var(--on-track); box-shadow: 0 0 0 3px rgba(95, 138, 78, 0.22); }
+.input:disabled, .textarea:disabled, .select:disabled { opacity: 0.6; cursor: not-allowed; }
+.input-error { border-color: var(--behind); }
+
+/* Inputs inside dark panels */
+.panel .label { color: var(--text-on-dark-soft); }
+.panel .input, .panel .textarea, .panel .select { background: var(--surface-2); color: var(--text-on-dark); border-color: var(--border-on-dark); }
+.panel .input::placeholder, .panel .textarea::placeholder { color: var(--text-on-dark-soft); }
 
 /* ==========================================================================
-   Badges (status pills) — earthy, readable
+   Badges (pill, mono)
    ========================================================================== */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-  padding: 3px 10px;
-  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
   border: 1px solid transparent;
   white-space: nowrap;
 }
+.badge svg { width: 12px; height: 12px; }
 .badge-dot { width: 7px; height: 7px; border-radius: 9999px; }
 
-.badge-on-track { background: var(--status-on-track-bg); color: var(--status-on-track); border-color: var(--status-on-track); }
-.badge-on-track .badge-dot { background: var(--status-on-track); }
-.badge-at-risk { background: var(--status-at-risk-bg); color: var(--status-at-risk); border-color: var(--status-at-risk); }
-.badge-at-risk .badge-dot { background: var(--status-at-risk); }
-.badge-behind { background: var(--status-behind-bg); color: var(--status-behind); border-color: var(--status-behind); }
-.badge-behind .badge-dot { background: var(--status-behind); }
+.badge-on-track { background: var(--on-track-tint); color: var(--on-track); border-color: var(--on-track); }
+.badge-on-track .badge-dot { background: var(--on-track); }
+.badge-at-risk { background: var(--at-risk-tint); color: var(--at-risk); border-color: var(--at-risk); }
+.badge-at-risk .badge-dot { background: var(--at-risk); }
+.badge-behind { background: var(--behind-tint); color: var(--behind); border-color: var(--behind); }
+.badge-behind .badge-dot { background: var(--behind); }
+.badge-neutral { background: rgba(20,23,27,0.05); color: var(--text-soft); border-color: var(--border-soft); }
+.badge-late { background: var(--behind-tint); color: var(--behind); border-color: var(--behind); }
 
-.badge-neutral { background: var(--glass-bg); color: var(--text-body); border-color: var(--glass-border); }
-.badge-late { background: var(--status-behind-bg); color: var(--status-behind); border-color: var(--status-behind); }
+/* On dark panels, badges read brighter */
+.panel .badge-neutral { background: rgba(236,239,228,0.08); color: var(--text-on-dark-soft); border-color: var(--border-on-dark); }
 
 /* ==========================================================================
-   Sidebar (sidebars.md)
+   Sidebar navigation
    ========================================================================== */
 .nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
-  border-radius: 14px;
-  color: var(--text-body);
+  padding: 10px 12px;
+  border-radius: 16px;
+  color: var(--text-on-dark-soft);
   font-weight: 500;
   font-size: 14px;
-  transition: all 200ms ease;
+  transition: background-color 160ms ease, color 160ms ease;
 }
-.nav-item:hover { background: var(--glass-bg-hover); color: var(--text-heading); }
-.nav-item-active { background: var(--brand-soft); color: var(--brand-strong); }
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.nav-item:hover { background: rgba(236, 239, 228, 0.07); color: var(--text-on-dark); }
+.nav-item-active { background: var(--primary); color: #14171b; }
+.nav-item-active:hover { background: var(--primary); color: #14171b; }
 
 /* ==========================================================================
    Utilities
    ========================================================================== */
-.muted { color: var(--text-body-subtle); }
-.heading-text { color: var(--text-heading); }
-.brand-text { color: var(--brand); }
-.divider { height: 1px; background: var(--glass-border-subtle); border: 0; }
+.muted { color: var(--text-soft); }
+.faint { color: var(--text-faint); }
+.divider { height: 1px; background: var(--border-soft); border: 0; }
+.panel .divider { background: var(--border-on-dark); }
 
-.skeleton {
-  background: linear-gradient(90deg, var(--glass-bg), var(--glass-bg-hover), var(--glass-bg));
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-  border-radius: 12px;
-}
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
+/* Big metric number */
+.metric { font-family: var(--font-display); font-weight: 500; line-height: 1; letter-spacing: -0.01em; }
+
+.spin { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.skeleton { background: linear-gradient(90deg, var(--card), var(--card-2), var(--card)); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 16px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Staggered entrance / masked reveal */
+@keyframes reveal-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.reveal { opacity: 0; animation: reveal-up 560ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.reveal-1 { animation-delay: 60ms; }
+.reveal-2 { animation-delay: 120ms; }
+.reveal-3 { animation-delay: 180ms; }
+.reveal-4 { animation-delay: 240ms; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  .reveal { opacity: 1; transform: none; }
 }
 
-/* Collapse the two-column page grids on smaller screens. */
+/* ==========================================================================
+   Back-compat aliases — map a few legacy token/class names used across the
+   pages onto the new Eco-Tech tokens, so older markup keeps the right look.
+   ========================================================================== */
+:root {
+  --glass-border: var(--border-soft);
+  --brand-soft: var(--on-track-tint);
+  --status-on-track: var(--on-track);
+  --status-at-risk: var(--at-risk);
+  --status-behind: var(--behind);
+}
+.heading-text { color: var(--text); }
+.panel .heading-text { color: var(--text-on-dark); }
+.brand-text { color: var(--on-track); }
+.btn-brand { background: var(--cta); color: #fff; }
+.btn-brand:hover { background: #000; }
+.panel .btn-brand { background: var(--primary); color: #14171b; }
+
+/* Collapse two-column page grids on smaller screens. */
 @media (max-width: 900px) {
-  .dashboard-grid,
-  .detail-grid {
-    grid-template-columns: 1fr !important;
-  }
+  .dashboard-grid, .detail-grid { grid-template-columns: 1fr !important; }
 }

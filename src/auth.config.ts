@@ -1,12 +1,12 @@
 import type { NextAuthConfig } from "next-auth";
-import Google from "next-auth/providers/google";
 
 /**
  * Edge-safe Auth.js config.
  *
- * This half contains NO database access (no Prisma adapter), so it can run in
- * the Edge middleware. The full config in `auth.ts` extends it with the Prisma
- * adapter and DB-backed callbacks (which run only in the Node.js runtime).
+ * This half contains NO database access and NO providers (the CAS Credentials
+ * provider, which uses Prisma + node:crypto, lives in `auth.ts`). Keeping
+ * providers out of here means the Edge middleware bundle stays clean — it only
+ * needs the `authorized` callback and JWT session decoding.
  */
 export const authConfig = {
   // JWT sessions so middleware can authorize without a database round-trip.
@@ -15,40 +15,34 @@ export const authConfig = {
     signIn: "/login",
     error: "/login",
   },
-  providers: [
-    Google({
-      // All users come from one trusted Google Workspace domain, so linking an
-      // OAuth login to a pre-seeded user row by email is safe here. This is what
-      // lets the seeded PM admin account attach to its Google login on first sign-in.
-      allowDangerousEmailAccountLinking: true,
-    }),
-  ],
+  providers: [], // real provider(s) are added in auth.ts (Node runtime)
   callbacks: {
     /**
-     * Used by the middleware to gate routes. Returning false redirects to the
-     * sign-in page. We only check identity + active status here (cheap, from the
-     * token); fine-grained permission checks happen in server actions/pages.
+     * Middleware route gate. To avoid stale-token redirect loops, this ONLY
+     * checks whether the user is logged in — it deliberately does NOT decide
+     * "pending vs active" here, because that status comes from the JWT (a
+     * snapshot from login time) and can disagree with the live database.
+     *
+     * The pending/active gate is enforced server-side instead, against the
+     * database (see `requireUser()` in src/lib/session.ts and the /pending and
+     * root pages), so there is a single source of truth and the two layers can
+     * never bounce the user back and forth.
      */
     authorized({ auth, request }) {
       const { pathname } = request.nextUrl;
-      const isLoggedIn = !!auth?.user;
-      const status = (auth?.user as { status?: string } | undefined)?.status;
 
-      // Public routes
+      // Public routes (auth screens + the CAS sign-in flow + cron).
       const isPublic =
         pathname === "/login" ||
         pathname === "/pending" ||
+        pathname === "/dev-login" ||
+        pathname.startsWith("/cas") ||
         pathname.startsWith("/api/auth") ||
+        pathname.startsWith("/api/cas") ||
         pathname.startsWith("/api/cron");
 
       if (isPublic) return true;
-      if (!isLoggedIn) return false;
-
-      // Logged in but not yet approved → only the /pending screen is allowed.
-      if (status !== "ACTIVE" && pathname !== "/pending") {
-        return Response.redirect(new URL("/pending", request.nextUrl));
-      }
-      return true;
+      return !!auth?.user; // logged in? otherwise redirect to sign-in
     },
   },
 } satisfies NextAuthConfig;

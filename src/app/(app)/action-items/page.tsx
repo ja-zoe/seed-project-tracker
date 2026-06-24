@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CheckCircle2, Circle } from "lucide-react";
 import { Permission } from "@prisma/client";
 import { requireUser } from "@/lib/session";
 import { can } from "@/lib/permissions";
@@ -36,10 +37,10 @@ export default async function ActionItemsPage() {
       <li style={{ display: "flex", alignItems: "flex-start", gap: 10, opacity: a.status === "DONE" ? 0.6 : 1 }}>
         {canToggle ? (
           <form action={toggleActionItem.bind(null, a.id)}>
-            <button className="btn btn-ghost btn-sm" style={{ padding: 4 }} aria-label="Toggle">{a.status === "DONE" ? "☑" : "☐"}</button>
+            <button className="btn btn-ghost btn-icon btn-sm" aria-label="Toggle" style={{ color: a.status === "DONE" ? "var(--on-track)" : "var(--text-faint)" }}>{a.status === "DONE" ? <CheckCircle2 size={18} /> : <Circle size={18} />}</button>
           </form>
         ) : (
-          <span aria-hidden style={{ padding: 4 }}>{a.status === "DONE" ? "☑" : "☐"}</span>
+          <span aria-hidden style={{ color: a.status === "DONE" ? "var(--on-track)" : "var(--text-faint)", display: "inline-flex", padding: 8 }}>{a.status === "DONE" ? <CheckCircle2 size={18} /> : <Circle size={18} />}</span>
         )}
         <div style={{ flex: 1 }}>
           <p className="heading-text" style={{ textDecoration: a.status === "DONE" ? "line-through" : "none" }}>{a.description}</p>
@@ -56,7 +57,7 @@ export default async function ActionItemsPage() {
 
   return (
     <>
-      <PageHeader title="Action items" description="Open commitments across the projects you can see." />
+      <PageHeader eyebrow="Accountability" title="Action items" description="Open commitments across the projects you can see." />
 
       {items.length === 0 ? (
         <EmptyState title="No action items" description="Action items created during meetings show up here." />
@@ -64,7 +65,7 @@ export default async function ActionItemsPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <Section title={`Assigned to me · ${mine.length}`}>
             {mine.length === 0 ? (
-              <p className="muted" style={{ fontSize: 14 }}>Nothing assigned to you. 🌱</p>
+              <p className="muted" style={{ fontSize: 14 }}>Nothing assigned to you right now.</p>
             ) : (
               <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
                 {mine.map((a) => <Row key={a.id} a={a} />)}

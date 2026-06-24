@@ -18,19 +18,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   // Primary nav — available to every active user.
   const primary: NavItem[] = [
-    { href: "/dashboard", label: "Dashboard", icon: "▱" },
-    { href: "/projects", label: "Projects", icon: "▤" },
-    { href: "/action-items", label: "Action Items", icon: "✓" },
+    { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
+    { href: "/projects", label: "Projects", icon: "projects" },
+    { href: "/action-items", label: "Action Items", icon: "actions" },
   ];
   if (can(user, Permission.VIEW_MONTHLY_REVIEW)) {
-    primary.push({ href: "/review", label: "Monthly Review", icon: "◷" });
+    primary.push({ href: "/review", label: "Monthly Review", icon: "review" });
   }
 
   // Admin nav — only the relevant capabilities.
   const admin: NavItem[] = [];
-  if (can(user, Permission.MANAGE_USERS)) admin.push({ href: "/admin/users", label: "Users", icon: "☻" });
-  if (can(user, Permission.MANAGE_ROLES)) admin.push({ href: "/admin/roles", label: "Roles", icon: "⚿" });
-  if (can(user, Permission.CONFIGURE_NOTIFICATIONS)) admin.push({ href: "/admin/notifications", label: "Notifications", icon: "⚙" });
+  if (can(user, Permission.MANAGE_USERS)) admin.push({ href: "/admin/users", label: "Users", icon: "users" });
+  if (can(user, Permission.MANAGE_ROLES)) admin.push({ href: "/admin/roles", label: "Roles", icon: "roles" });
+  if (can(user, Permission.CONFIGURE_NOTIFICATIONS)) admin.push({ href: "/admin/notifications", label: "Notifications", icon: "settings" });
 
   const groups = [{ items: primary }, ...(admin.length ? [{ heading: "Admin", items: admin }] : [])];
 
