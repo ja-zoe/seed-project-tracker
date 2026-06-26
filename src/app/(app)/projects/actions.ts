@@ -3,11 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { Permission, ProjectStatus } from "@prisma/client";
+import { Permission, ProjectStatus, ProjectMemberRole, TimelineStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { assertPermission, getCurrentUser } from "@/lib/session";
 import { canEditProject } from "@/lib/permissions";
-import { isAssignedTo } from "@/lib/queries";
+import { isLeadOf } from "@/lib/queries";
 import { getSettings, isSubmissionLate, recomputeProjectStatus } from "@/lib/health";
 import { notifyUser, resolveRecipients } from "@/lib/notify";
 import { NotificationType } from "@prisma/client";
@@ -16,7 +16,7 @@ import { NotificationType } from "@prisma/client";
 async function assertCanEditProject(projectId: string) {
   const user = await getCurrentUser();
   if (!user || user.status !== "ACTIVE") throw new Error("Not authenticated");
-  const assigned = await isAssignedTo(user.id, projectId);
+  const assigned = await isLeadOf(user.id, projectId);
   if (!canEditProject(user, assigned)) throw new Error("Forbidden");
   return user;
 }
@@ -73,16 +73,45 @@ export async function deleteProject(projectId: string) {
   redirect("/projects");
 }
 
-/** PM assigns / unassigns leads on a project. */
+/** PM assigns / unassigns leads on a project (leaves general members intact). */
 export async function setProjectLeads(projectId: string, leadIds: string[]) {
   await assertPermission(Permission.MANAGE_PROJECTS);
   await prisma.$transaction([
-    prisma.projectAssignment.deleteMany({ where: { projectId } }),
+    prisma.projectAssignment.deleteMany({ where: { projectId, role: ProjectMemberRole.LEAD } }),
     prisma.projectAssignment.createMany({
-      data: leadIds.map((userId) => ({ projectId, userId })),
+      data: leadIds.map((userId) => ({ projectId, userId, role: ProjectMemberRole.LEAD })),
       skipDuplicates: true,
     }),
   ]);
+  revalidatePath(`/projects/${projectId}`);
+}
+
+// ---------------------------------------------------------------------------
+// Project membership (general members) — used by the semester timeline so
+// subtasks can be assigned to people, and so members get their own view.
+// ---------------------------------------------------------------------------
+
+/** Add a general member to a project (idempotent; never demotes an existing lead). */
+export async function addProjectMember(projectId: string, formData: FormData) {
+  await assertCanEditProject(projectId);
+  const userId = z.string().min(1).parse(formData.get("userId"));
+  const existing = await prisma.projectAssignment.findUnique({
+    where: { projectId_userId: { projectId, userId } },
+  });
+  if (!existing) {
+    await prisma.projectAssignment.create({
+      data: { projectId, userId, role: ProjectMemberRole.MEMBER },
+    });
+  }
+  revalidatePath(`/projects/${projectId}`);
+}
+
+/** Remove a general member from a project. Leads are managed via setProjectLeads. */
+export async function removeProjectMember(projectId: string, userId: string) {
+  await assertCanEditProject(projectId);
+  await prisma.projectAssignment.deleteMany({
+    where: { projectId, userId, role: ProjectMemberRole.MEMBER },
+  });
   revalidatePath(`/projects/${projectId}`);
 }
 
@@ -112,37 +141,256 @@ export async function saveCorrectivePlan(projectId: string, plan: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Milestones
+// Semester timeline — deliverables (major milestones) + nested subtasks
 // ---------------------------------------------------------------------------
 
-export async function addMilestone(projectId: string, formData: FormData) {
+/** Keep the `completed` flag (used by health detection) in sync with status. */
+function completionFor(status: TimelineStatus, prevCompletedDate: Date | null) {
+  const completed = status === TimelineStatus.COMPLETE;
+  return {
+    completed,
+    completedDate: completed ? prevCompletedDate ?? new Date() : null,
+  };
+}
+
+const deliverableSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  targetDate: z.coerce.date(),
+  startDate: z.coerce.date().optional(),
+  status: z.nativeEnum(TimelineStatus).optional(),
+});
+
+export async function addDeliverable(projectId: string, formData: FormData) {
   await assertCanEditProject(projectId);
-  const title = z.string().min(1).parse(formData.get("title"));
-  const targetDate = z.coerce.date().parse(formData.get("targetDate"));
-  await prisma.milestone.create({ data: { projectId, title, targetDate } });
+  const data = deliverableSchema.parse({
+    title: formData.get("title"),
+    description: formData.get("description")?.toString() || undefined,
+    targetDate: formData.get("targetDate"),
+    startDate: formData.get("startDate") || undefined,
+    status: formData.get("status") || undefined,
+  });
+  const status = data.status ?? TimelineStatus.NOT_STARTED;
+  const last = await prisma.deliverable.findFirst({
+    where: { projectId },
+    orderBy: { orderIndex: "desc" },
+    select: { orderIndex: true },
+  });
+  await prisma.deliverable.create({
+    data: {
+      projectId,
+      title: data.title,
+      description: data.description,
+      targetDate: data.targetDate,
+      startDate: data.startDate,
+      status,
+      orderIndex: (last?.orderIndex ?? -1) + 1,
+      ...completionFor(status, null),
+    },
+  });
   await recomputeProjectStatus(projectId);
   revalidatePath(`/projects/${projectId}`);
 }
 
-export async function toggleMilestone(milestoneId: string) {
-  const m = await prisma.milestone.findUnique({ where: { id: milestoneId } });
-  if (!m) throw new Error("Milestone not found");
-  await assertCanEditProject(m.projectId);
-  await prisma.milestone.update({
-    where: { id: milestoneId },
-    data: { completed: !m.completed, completedDate: !m.completed ? new Date() : null },
+export async function updateDeliverable(deliverableId: string, formData: FormData) {
+  const d = await prisma.deliverable.findUnique({ where: { id: deliverableId } });
+  if (!d) throw new Error("Deliverable not found");
+  await assertCanEditProject(d.projectId);
+  const data = deliverableSchema.parse({
+    title: formData.get("title"),
+    description: formData.get("description")?.toString() || undefined,
+    targetDate: formData.get("targetDate"),
+    startDate: formData.get("startDate") || undefined,
+    status: formData.get("status") || undefined,
   });
-  await recomputeProjectStatus(m.projectId);
-  revalidatePath(`/projects/${m.projectId}`);
+  const status = data.status ?? d.status;
+  await prisma.deliverable.update({
+    where: { id: deliverableId },
+    data: {
+      title: data.title,
+      description: data.description ?? null,
+      targetDate: data.targetDate,
+      startDate: data.startDate ?? null,
+      status,
+      ...completionFor(status, d.completedDate),
+    },
+  });
+  await recomputeProjectStatus(d.projectId);
+  revalidatePath(`/projects/${d.projectId}`);
 }
 
-export async function deleteMilestone(milestoneId: string) {
-  const m = await prisma.milestone.findUnique({ where: { id: milestoneId } });
-  if (!m) return;
-  await assertCanEditProject(m.projectId);
-  await prisma.milestone.delete({ where: { id: milestoneId } });
-  await recomputeProjectStatus(m.projectId);
-  revalidatePath(`/projects/${m.projectId}`);
+/** Quick status cycle from the timeline (NOT_STARTED → IN_PROGRESS → COMPLETE). */
+export async function setDeliverableStatus(deliverableId: string, status: TimelineStatus) {
+  const d = await prisma.deliverable.findUnique({ where: { id: deliverableId } });
+  if (!d) throw new Error("Deliverable not found");
+  await assertCanEditProject(d.projectId);
+  await prisma.deliverable.update({
+    where: { id: deliverableId },
+    data: { status, ...completionFor(status, d.completedDate) },
+  });
+  await recomputeProjectStatus(d.projectId);
+  revalidatePath(`/projects/${d.projectId}`);
+}
+
+export async function deleteDeliverable(deliverableId: string) {
+  const d = await prisma.deliverable.findUnique({ where: { id: deliverableId } });
+  if (!d) return;
+  await assertCanEditProject(d.projectId);
+  await prisma.deliverable.delete({ where: { id: deliverableId } });
+  await recomputeProjectStatus(d.projectId);
+  revalidatePath(`/projects/${d.projectId}`);
+}
+
+const subtaskSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  assigneeId: z.string().optional(),
+  dueDate: z.coerce.date().optional(),
+  startDate: z.coerce.date().optional(),
+  status: z.nativeEnum(TimelineStatus).optional(),
+});
+
+/** Confirm an assignee (if any) is actually a member of the project. */
+async function assertAssigneeIsMember(projectId: string, assigneeId: string | undefined) {
+  if (!assigneeId) return;
+  const member = await prisma.projectAssignment.findUnique({
+    where: { projectId_userId: { projectId, userId: assigneeId } },
+  });
+  if (!member) throw new Error("Subtasks can only be assigned to a project member");
+}
+
+export async function addSubtask(deliverableId: string, formData: FormData) {
+  const d = await prisma.deliverable.findUnique({ where: { id: deliverableId } });
+  if (!d) throw new Error("Deliverable not found");
+  await assertCanEditProject(d.projectId);
+  const data = subtaskSchema.parse({
+    title: formData.get("title"),
+    description: formData.get("description")?.toString() || undefined,
+    assigneeId: formData.get("assigneeId")?.toString() || undefined,
+    dueDate: formData.get("dueDate") || undefined,
+    startDate: formData.get("startDate") || undefined,
+    status: formData.get("status") || undefined,
+  });
+  await assertAssigneeIsMember(d.projectId, data.assigneeId);
+  const status = data.status ?? TimelineStatus.NOT_STARTED;
+  const last = await prisma.subtask.findFirst({
+    where: { deliverableId },
+    orderBy: { orderIndex: "desc" },
+    select: { orderIndex: true },
+  });
+  const subtask = await prisma.subtask.create({
+    data: {
+      deliverableId,
+      title: data.title,
+      description: data.description,
+      assigneeId: data.assigneeId,
+      dueDate: data.dueDate,
+      startDate: data.startDate,
+      status,
+      orderIndex: (last?.orderIndex ?? -1) + 1,
+      completedAt: status === TimelineStatus.COMPLETE ? new Date() : null,
+    },
+    include: { deliverable: { select: { projectId: true, project: { select: { name: true } } } } },
+  });
+  await notifyAssignee(subtask.assigneeId, subtask.deliverable.projectId, subtask.deliverable.project.name, subtask.title);
+  revalidatePath(`/projects/${d.projectId}`);
+}
+
+export async function updateSubtask(subtaskId: string, formData: FormData) {
+  const s = await prisma.subtask.findUnique({
+    where: { id: subtaskId },
+    include: { deliverable: { select: { projectId: true, project: { select: { name: true } } } } },
+  });
+  if (!s) throw new Error("Subtask not found");
+  await assertCanEditProject(s.deliverable.projectId);
+  const data = subtaskSchema.parse({
+    title: formData.get("title"),
+    description: formData.get("description")?.toString() || undefined,
+    assigneeId: formData.get("assigneeId")?.toString() || undefined,
+    dueDate: formData.get("dueDate") || undefined,
+    startDate: formData.get("startDate") || undefined,
+    status: formData.get("status") || undefined,
+  });
+  await assertAssigneeIsMember(s.deliverable.projectId, data.assigneeId);
+  const status = data.status ?? s.status;
+  await prisma.subtask.update({
+    where: { id: subtaskId },
+    data: {
+      title: data.title,
+      description: data.description ?? null,
+      assigneeId: data.assigneeId ?? null,
+      dueDate: data.dueDate ?? null,
+      startDate: data.startDate ?? null,
+      status,
+      completedAt: status === TimelineStatus.COMPLETE ? s.completedAt ?? new Date() : null,
+    },
+  });
+  // Notify on a newly-assigned owner.
+  if (data.assigneeId && data.assigneeId !== s.assigneeId) {
+    await notifyAssignee(data.assigneeId, s.deliverable.projectId, s.deliverable.project.name, data.title);
+  }
+  revalidatePath(`/projects/${s.deliverable.projectId}`);
+}
+
+/**
+ * Update a subtask's status. Usable by the assignee themselves (so a general
+ * member can mark their own work progressing) or by anyone who can edit the project.
+ */
+export async function setSubtaskStatus(subtaskId: string, status: TimelineStatus) {
+  const user = await getCurrentUser();
+  if (!user || user.status !== "ACTIVE") throw new Error("Not authenticated");
+  const s = await prisma.subtask.findUnique({
+    where: { id: subtaskId },
+    include: { deliverable: { select: { projectId: true } } },
+  });
+  if (!s) throw new Error("Subtask not found");
+
+  const isAssignee = s.assigneeId === user.id;
+  const canEdit = canEditProject(user, await isLeadOf(user.id, s.deliverable.projectId));
+  if (!isAssignee && !canEdit) throw new Error("Forbidden");
+
+  await prisma.subtask.update({
+    where: { id: subtaskId },
+    data: { status, completedAt: status === TimelineStatus.COMPLETE ? s.completedAt ?? new Date() : null },
+  });
+  revalidatePath(`/projects/${s.deliverable.projectId}`);
+  revalidatePath("/my-tasks");
+}
+
+/** formData wrappers so a <select> can post a status change on change. */
+export async function deliverableStatusAction(deliverableId: string, formData: FormData) {
+  const status = z.nativeEnum(TimelineStatus).parse(formData.get("status"));
+  await setDeliverableStatus(deliverableId, status);
+}
+
+export async function subtaskStatusAction(subtaskId: string, formData: FormData) {
+  const status = z.nativeEnum(TimelineStatus).parse(formData.get("status"));
+  await setSubtaskStatus(subtaskId, status);
+}
+
+export async function deleteSubtask(subtaskId: string) {
+  const s = await prisma.subtask.findUnique({
+    where: { id: subtaskId },
+    include: { deliverable: { select: { projectId: true } } },
+  });
+  if (!s) return;
+  await assertCanEditProject(s.deliverable.projectId);
+  await prisma.subtask.delete({ where: { id: subtaskId } });
+  revalidatePath(`/projects/${s.deliverable.projectId}`);
+}
+
+/** Notify a member that a subtask was assigned to them. */
+async function notifyAssignee(assigneeId: string | null, projectId: string, projectName: string, title: string) {
+  const current = await getCurrentUser();
+  if (!assigneeId || assigneeId === current?.id) return;
+  const owner = await prisma.user.findUnique({ where: { id: assigneeId }, select: { id: true, email: true } });
+  if (!owner) return;
+  await notifyUser(owner, "BOTH", {
+    type: NotificationType.ACTION_ITEM,
+    title: `New task: ${projectName}`,
+    body: title,
+    link: "/my-tasks",
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -174,7 +422,7 @@ export async function submitStatusUpdate(formData: FormData) {
   });
 
   // A lead may only submit for their own project (PMs can submit for any).
-  const assigned = await isAssignedTo(user.id, data.projectId);
+  const assigned = await isLeadOf(user.id, data.projectId);
   const isPM = user.permissions.includes(Permission.MANAGE_PROJECTS);
   if (!assigned && !isPM) throw new Error("You can only submit for your own project");
 

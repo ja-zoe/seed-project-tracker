@@ -20,6 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const primary: NavItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
     { href: "/projects", label: "Projects", icon: "projects" },
+    { href: "/my-tasks", label: "My Tasks", icon: "mytasks" },
     { href: "/action-items", label: "Action Items", icon: "actions" },
   ];
   if (can(user, Permission.VIEW_MONTHLY_REVIEW)) {

@@ -2,6 +2,7 @@ import { requirePermission } from "@/lib/session";
 import { Permission } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/ui";
+import { BackLink, SpinnerButton } from "@/components/loading";
 import { createProject } from "../actions";
 
 /** PM-only: create a new project and (optionally) assign leads up front. */
@@ -17,6 +18,7 @@ export default async function NewProjectPage() {
 
   return (
     <>
+      <BackLink href="/projects" label="Projects" />
       <PageHeader eyebrow="Create" title="New project" description="Define a project and assign its lead(s)." />
       <form action={createProject} className="panel-light" style={{ maxWidth: 640, display: "flex", flexDirection: "column", gap: 16 }}>
         <div>
@@ -41,7 +43,7 @@ export default async function NewProjectPage() {
           <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>Hold ⌘/Ctrl to select multiple leads.</p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button type="submit" className="btn btn-brand">Create project</button>
+          <SpinnerButton variant="brand">Create project</SpinnerButton>
         </div>
       </form>
     </>

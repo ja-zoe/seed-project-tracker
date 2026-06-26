@@ -7,10 +7,10 @@ export function weekLabel(d: Date): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-/** Milestone completion summary. */
-export function milestoneProgress(milestones: { completed: boolean }[]) {
-  const total = milestones.length;
-  const completed = milestones.filter((m) => m.completed).length;
+/** Deliverable completion summary (the semester-timeline progress bar). */
+export function deliverableProgress(deliverables: { completed: boolean }[]) {
+  const total = deliverables.length;
+  const completed = deliverables.filter((d) => d.completed).length;
   return { completed, total, pct: total === 0 ? 0 : (completed / total) * 100 };
 }
 

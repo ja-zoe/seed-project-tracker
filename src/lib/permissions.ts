@@ -63,7 +63,7 @@ export const PERMISSION_META: Record<Permission, { label: string; group: string;
   EDIT_OWN_PROJECT: { label: "Edit own project", group: "Weekly loop", description: "Edit projects the user is assigned to lead." },
   POST_MEETING_TRACKING: { label: "Post-meeting tracking", group: "Weekly loop", description: "Record status, goals, and blockers after meetings." },
   MANAGE_PROJECTS: { label: "Manage projects", group: "Administration", description: "Create, edit, and delete any project." },
-  MANAGE_MILESTONES: { label: "Manage milestones", group: "Administration", description: "Define and edit the semester milestone plan." },
+  MANAGE_MILESTONES: { label: "Manage timeline", group: "Administration", description: "Define and edit the semester timeline (deliverables & subtasks)." },
   ASSIGN_ACTION_ITEMS: { label: "Assign action items", group: "Accountability", description: "Create and assign action items." },
   CLOSE_ACTION_ITEMS: { label: "Close action items", group: "Accountability", description: "Mark action items as done." },
   CONFIGURE_NOTIFICATIONS: { label: "Configure notifications", group: "Administration", description: "Manage notification rules and red-flag thresholds." },

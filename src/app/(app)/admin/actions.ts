@@ -41,13 +41,13 @@ export async function setUserStatus(userId: string, status: UserStatus) {
   revalidatePath("/admin/users");
 }
 
-/** Replace a user's project assignments. */
+/** Replace the projects a user *leads* (leaves their general-member roles intact). */
 export async function setUserProjects(userId: string, projectIds: string[]) {
   await assertPermission(Permission.MANAGE_USERS);
   await prisma.$transaction([
-    prisma.projectAssignment.deleteMany({ where: { userId } }),
+    prisma.projectAssignment.deleteMany({ where: { userId, role: "LEAD" } }),
     prisma.projectAssignment.createMany({
-      data: projectIds.map((projectId) => ({ projectId, userId })),
+      data: projectIds.map((projectId) => ({ projectId, userId, role: "LEAD" as const })),
       skipDuplicates: true,
     }),
   ]);

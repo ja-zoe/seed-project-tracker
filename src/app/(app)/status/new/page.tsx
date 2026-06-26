@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { can } from "@/lib/permissions";
 import { PageHeader, EmptyState } from "@/components/ui";
 import { StatusUpdateForm } from "@/components/forms";
+import { BackLink } from "@/components/loading";
 import { submitStatusUpdate } from "../../projects/actions";
 
 /** Standalone "submit a status update" page with a project picker. */
@@ -12,13 +13,14 @@ export default async function NewStatusPage() {
 
   // PMs can submit for any project; leads only for projects they're assigned to.
   const projects = await prisma.project.findMany({
-    where: can(user, Permission.MANAGE_PROJECTS) ? {} : { assignments: { some: { userId: user.id } } },
+    where: can(user, Permission.MANAGE_PROJECTS) ? {} : { assignments: { some: { userId: user.id, role: "LEAD" } } },
     select: { id: true, name: true },
     orderBy: { name: "asc" },
   });
 
   return (
     <>
+      <BackLink href="/dashboard" label="Dashboard" />
       <PageHeader eyebrow="Weekly check-in" title="Submit status update" description="Your weekly pre-meeting check-in." />
       {projects.length === 0 ? (
         <EmptyState title="No projects to submit for" description="You aren't assigned to a project yet. Ask the PM to add you." />

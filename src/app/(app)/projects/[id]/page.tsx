@@ -1,19 +1,17 @@
 import { notFound } from "next/navigation";
-import { Permission } from "@prisma/client";
+import { Permission, ProjectMemberRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { can, canEditProject } from "@/lib/permissions";
-import { canViewProject, isAssignedTo } from "@/lib/queries";
-import { milestoneProgress } from "@/lib/stats";
+import { canViewProject, isLeadOf } from "@/lib/queries";
 import { fmtDate, fmtDateTime, fmtDeadline, STATUS_LABEL } from "@/lib/format";
-import { Flag, CheckCircle2, Circle, Trash2, CheckCheck } from "lucide-react";
+import { Flag, CheckCircle2, Circle, Trash2, CheckCheck, Crown, UserPlus } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Section, ProgressBar, EmptyState } from "@/components/ui";
+import { Section, EmptyState } from "@/components/ui";
 import { StatusUpdateForm, TrackingForm, SubmitButton } from "@/components/forms";
+import { Timeline } from "@/components/Timeline";
+import { BackLink, IconSubmit, SpinnerButton } from "@/components/loading";
 import {
-  addMilestone,
-  toggleMilestone,
-  deleteMilestone,
   submitStatusUpdate,
   recordMeeting,
   createActionItem,
@@ -21,6 +19,8 @@ import {
   deleteActionItem,
   overrideProjectStatus,
   saveCorrectivePlan,
+  addProjectMember,
+  removeProjectMember,
 } from "../actions";
 
 export default async function ProjectDetailPage({
@@ -40,7 +40,15 @@ export default async function ProjectDetailPage({
     where: { id },
     include: {
       assignments: { include: { user: { select: { id: true, name: true, email: true } } } },
-      milestones: { orderBy: { targetDate: "asc" } },
+      deliverables: {
+        orderBy: { orderIndex: "asc" },
+        include: {
+          subtasks: {
+            orderBy: { orderIndex: "asc" },
+            include: { assignee: { select: { id: true, name: true, email: true } } },
+          },
+        },
+      },
       statusUpdates: { orderBy: { meetingDate: "desc" }, include: { submittedBy: { select: { name: true, email: true } } }, take: 10 },
       meetingRecords: { orderBy: { meetingDate: "desc" }, include: { recordedBy: { select: { name: true, email: true } } }, take: 10 },
       actionItems: { orderBy: [{ status: "asc" }, { deadline: "asc" }], include: { owner: { select: { name: true, email: true } } } },
@@ -48,17 +56,24 @@ export default async function ProjectDetailPage({
   });
   if (!project) notFound();
 
-  const assigned = await isAssignedTo(user.id, id);
+  const assigned = await isLeadOf(user.id, id);
   const canEdit = canEditProject(user, assigned);
   const isManager = can(user, Permission.MANAGE_PROJECTS);
   const canTrack = can(user, Permission.POST_MEETING_TRACKING);
   const canSubmit = can(user, Permission.SUBMIT_STATUS_UPDATES) && (assigned || isManager);
   const canAssign = can(user, Permission.ASSIGN_ACTION_ITEMS);
 
-  const mp = milestoneProgress(project.milestones);
-  const leads = project.assignments.map((a) => a.user);
+  const leads = project.assignments.filter((a) => a.role === ProjectMemberRole.LEAD).map((a) => a.user);
+  const generalMembers = project.assignments.filter((a) => a.role === ProjectMemberRole.MEMBER).map((a) => a.user);
+  const members = project.assignments.map((a) => a.user); // anyone on the project can own work
   const openItems = project.actionItems.filter((a) => a.status === "OPEN");
   const doneItems = project.actionItems.filter((a) => a.status === "DONE");
+
+  // Active users not already on the project — candidates to add as members.
+  const memberIds = new Set(members.map((m) => m.id));
+  const candidates = canEdit
+    ? (await prisma.user.findMany({ where: { status: "ACTIVE" }, select: { id: true, name: true, email: true }, orderBy: { name: "asc" } })).filter((u) => !memberIds.has(u.id))
+    : [];
 
   // Inline server action so the corrective-plan textarea can post its content.
   async function savePlan(formData: FormData) {
@@ -68,6 +83,8 @@ export default async function ProjectDetailPage({
 
   return (
     <>
+      <BackLink href="/projects" label="Projects" />
+
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap", marginBottom: 8 }}>
         <div>
@@ -76,10 +93,16 @@ export default async function ProjectDetailPage({
           <p className="muted">{leads.length ? `Led by ${leads.map((l) => l.name ?? l.email).join(", ")}` : "No leads assigned"}</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          {assigned && <span className="badge badge-on-track" title="You lead this project"><Crown size={13} /> You lead</span>}
           <StatusBadge status={project.status} />
           {project.statusOverride && <span className="badge badge-neutral">Manual override</span>}
         </div>
       </div>
+      {!assigned && !isManager && (
+        <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+          You&apos;re viewing this project as {generalMembers.some((m) => m.id === user.id) ? "a member" : "read-only"}. Changes are made by its leads.
+        </p>
+      )}
       {project.description && <p style={{ maxWidth: 720, marginBottom: 16 }}>{project.description}</p>}
 
       {/* Toast-ish confirmations */}
@@ -117,14 +140,14 @@ export default async function ProjectDetailPage({
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {(["ON_TRACK", "AT_RISK", "BEHIND"] as const).map((s) => (
                 <form key={s} action={overrideProjectStatus.bind(null, id, s)}>
-                  <button className={`btn btn-sm ${project.status === s && project.statusOverride ? "btn-brand" : "btn-secondary"}`}>
+                  <SpinnerButton variant={project.status === s && project.statusOverride ? "brand" : "secondary"} className="btn-sm">
                     {STATUS_LABEL[s]}
-                  </button>
+                  </SpinnerButton>
                 </form>
               ))}
               {project.statusOverride && (
                 <form action={overrideProjectStatus.bind(null, id, null)}>
-                  <button className="btn btn-sm btn-ghost">Auto-detect</button>
+                  <SpinnerButton variant="ghost" className="btn-sm">Auto-detect</SpinnerButton>
                 </form>
               )}
             </div>
@@ -132,56 +155,20 @@ export default async function ProjectDetailPage({
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 20, alignItems: "start" }} className="detail-grid">
-        {/* LEFT: milestones + action items */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <Section title={`Milestones · ${mp.completed}/${mp.total}`}>
-            <div style={{ marginBottom: 14 }}><ProgressBar value={mp.pct} /></div>
-            {project.milestones.length === 0 ? (
-              <p className="muted" style={{ fontSize: 14 }}>No milestones defined. This is the semester plan progress is measured against.</p>
-            ) : (
-              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-                {project.milestones.map((m) => {
-                  const overdue = !m.completed && m.targetDate.getTime() < Date.now();
-                  return (
-                    <li key={m.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      {canEdit ? (
-                        <form action={toggleMilestone.bind(null, m.id)}>
-                          <button className="btn btn-ghost btn-icon btn-sm" aria-label="Toggle milestone" style={{ color: m.completed ? "var(--on-track)" : "var(--text-faint)" }}>
-                            {m.completed ? <CheckCircle2 size={18} /> : <Circle size={18} />}
-                          </button>
-                        </form>
-                      ) : (
-                        <span aria-hidden style={{ color: m.completed ? "var(--on-track)" : "var(--text-faint)", display: "inline-flex", padding: 8 }}>
-                          {m.completed ? <CheckCircle2 size={18} /> : <Circle size={18} />}
-                        </span>
-                      )}
-                      <div style={{ flex: 1 }}>
-                        <span className="heading-text" style={{ textDecoration: m.completed ? "line-through" : "none" }}>{m.title}</span>
-                        <span className="muted" style={{ fontSize: 12, marginLeft: 8 }}>
-                          {m.completed ? `Done ${fmtDate(m.completedDate)}` : `Target ${fmtDate(m.targetDate)}`}
-                        </span>
-                        {overdue && <span className="badge badge-behind" style={{ marginLeft: 8 }}>Overdue</span>}
-                      </div>
-                      {canEdit && (
-                        <form action={deleteMilestone.bind(null, m.id)}>
-                          <button className="btn btn-ghost btn-icon btn-sm faint" aria-label="Delete milestone"><Trash2 size={15} /></button>
-                        </form>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-            {canEdit && (
-              <form action={addMilestone.bind(null, id)} style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
-                <input name="title" className="input" placeholder="New milestone" required style={{ flex: 2, minWidth: 160 }} />
-                <input name="targetDate" type="date" className="input" required style={{ flex: 1, minWidth: 140 }} />
-                <SubmitButton variant="secondary" pendingLabel="Adding…">Add</SubmitButton>
-              </form>
-            )}
-          </Section>
+      {/* Semester timeline (full width) */}
+      <div style={{ marginBottom: 20 }}>
+        <Timeline
+          projectId={project.id}
+          deliverables={project.deliverables}
+          members={members}
+          canEdit={canEdit}
+          currentUserId={user.id}
+        />
+      </div>
 
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 20, alignItems: "start" }} className="detail-grid">
+        {/* LEFT: action items + members */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <Section title={`Action items · ${openItems.length} open`}>
             {project.actionItems.length === 0 ? (
               <p className="muted" style={{ fontSize: 14 }}>No action items yet.</p>
@@ -193,7 +180,7 @@ export default async function ProjectDetailPage({
                     <li key={a.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, opacity: a.status === "DONE" ? 0.6 : 1 }}>
                       {canToggle ? (
                         <form action={toggleActionItem.bind(null, a.id)}>
-                          <button className="btn btn-ghost btn-icon btn-sm" aria-label="Toggle action item" style={{ color: a.status === "DONE" ? "var(--on-track)" : "var(--text-faint)" }}>{a.status === "DONE" ? <CheckCircle2 size={18} /> : <Circle size={18} />}</button>
+                          <IconSubmit label="Toggle action item" style={{ color: a.status === "DONE" ? "var(--on-track)" : "var(--text-faint)" }}>{a.status === "DONE" ? <CheckCircle2 size={18} /> : <Circle size={18} />}</IconSubmit>
                         </form>
                       ) : (
                         <span aria-hidden style={{ color: a.status === "DONE" ? "var(--on-track)" : "var(--text-faint)", display: "inline-flex", padding: 8 }}>{a.status === "DONE" ? <CheckCircle2 size={18} /> : <Circle size={18} />}</span>
@@ -207,7 +194,7 @@ export default async function ProjectDetailPage({
                       </div>
                       {canAssign && (
                         <form action={deleteActionItem.bind(null, a.id)}>
-                          <button className="btn btn-ghost btn-icon btn-sm faint" aria-label="Delete action item"><Trash2 size={15} /></button>
+                          <IconSubmit label="Delete action item" className="btn btn-ghost btn-icon btn-sm faint"><Trash2 size={15} /></IconSubmit>
                         </form>
                       )}
                     </li>
@@ -222,7 +209,7 @@ export default async function ProjectDetailPage({
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <select name="ownerId" className="select" defaultValue="" style={{ flex: 1, minWidth: 140 }}>
                     <option value="">Unassigned</option>
-                    {leads.map((l) => (
+                    {members.map((l) => (
                       <option key={l.id} value={l.id}>{l.name ?? l.email}</option>
                     ))}
                   </select>
@@ -231,6 +218,42 @@ export default async function ProjectDetailPage({
                 </div>
               </form>
             )}
+          </Section>
+
+          {/* Members (general members can be assigned subtasks) */}
+          <Section title={`Members · ${members.length}`}>
+            {members.length === 0 ? (
+              <p className="muted" style={{ fontSize: 14 }}>No one assigned yet.</p>
+            ) : (
+              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+                {project.assignments.map((a) => (
+                  <li key={a.userId} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, fontSize: 14 }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                      {a.role === "LEAD" ? <Crown size={14} style={{ color: "var(--at-risk)" }} /> : <span aria-hidden style={{ width: 14 }} />}
+                      {a.user.name ?? a.user.email}
+                      <span className={`badge ${a.role === "LEAD" ? "badge-on-track" : "badge-neutral"}`}>{a.role === "LEAD" ? "Lead" : "Member"}</span>
+                    </span>
+                    {canEdit && a.role === "MEMBER" && (
+                      <form action={removeProjectMember.bind(null, id, a.userId)}>
+                        <IconSubmit label="Remove member" className="btn btn-ghost btn-icon btn-sm faint"><Trash2 size={14} /></IconSubmit>
+                      </form>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {canEdit && candidates.length > 0 && (
+              <form action={addProjectMember.bind(null, id)} style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+                <select name="userId" className="select" required defaultValue="" style={{ flex: 1, minWidth: 160 }}>
+                  <option value="" disabled>Add a member…</option>
+                  {candidates.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name ?? u.email}</option>
+                  ))}
+                </select>
+                <SpinnerButton variant="secondary" className="btn-sm"><UserPlus size={14} /> Add</SpinnerButton>
+              </form>
+            )}
+            <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>Leads are managed by the PM. Members can be assigned timeline subtasks.</p>
           </Section>
         </div>
 

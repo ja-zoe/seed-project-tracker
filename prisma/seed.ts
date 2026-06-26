@@ -28,6 +28,14 @@ const LEAD_PERMISSIONS: Permission[] = [
 
 const VIEWER_PERMISSIONS: Permission[] = [Permission.VIEW_ALL_PROJECTS];
 
+// General members work *inside* a project: they see the project(s) they're
+// assigned to (read-only) and act on the timeline subtasks / action items
+// assigned to them. Visibility is scoped to their assignments, not the whole club.
+const MEMBER_PERMISSIONS: Permission[] = [
+  Permission.VIEW_ASSIGNED_PROJECTS,
+  Permission.CLOSE_ACTION_ITEMS, // close action items they own
+];
+
 async function seedRoles() {
   const roles: { name: string; description: string; permissions: Permission[] }[] = [
     {
@@ -46,6 +54,12 @@ async function seedRoles() {
       name: "Viewer",
       description: "Read-only access across projects. No editing or submissions.",
       permissions: VIEWER_PERMISSIONS,
+    },
+    {
+      name: "General Member",
+      description:
+        "Works inside assigned project(s): read-only project view plus the timeline subtasks and action items assigned to them, which they can update.",
+      permissions: MEMBER_PERMISSIONS,
     },
   ];
 
@@ -142,18 +156,61 @@ async function seedDemo() {
     },
   });
 
+  const memberRole = await prisma.role.findUnique({ where: { name: "General Member" } });
+  const member = await prisma.user.upsert({
+    where: { email: "demo-member@scarletmail.rutgers.edu" },
+    update: {},
+    create: {
+      email: "demo-member@scarletmail.rutgers.edu",
+      name: "Demo Member",
+      status: "ACTIVE",
+      roleId: memberRole?.id,
+    },
+  });
+
   const project = await prisma.project.create({
     data: {
       name: "Campus Solar Garden",
       description: "Install a small solar array and native pollinator garden behind the engineering building.",
       semester: "Fall 2026",
       status: "ON_TRACK",
-      assignments: { create: { userId: lead.id } },
-      milestones: {
+      assignments: {
         create: [
-          { title: "Secure faculty sponsor", targetDate: new Date("2026-09-15"), completed: true, completedDate: new Date("2026-09-10") },
-          { title: "Finalize site permit", targetDate: new Date("2026-10-01") },
-          { title: "Order panels", targetDate: new Date("2026-10-20") },
+          { userId: lead.id, role: "LEAD" },
+          { userId: member.id, role: "MEMBER" },
+        ],
+      },
+      deliverables: {
+        create: [
+          {
+            title: "Secure faculty sponsor & funding",
+            description: "Confirm a faculty advisor in the engineering department and secure the $4k materials budget through the SEED grant.",
+            targetDate: new Date("2026-09-15"),
+            status: "COMPLETE",
+            completed: true,
+            completedDate: new Date("2026-09-10"),
+            orderIndex: 0,
+          },
+          {
+            title: "Finalize site permit & electrical plan",
+            description: "Obtain the facilities permit for the site behind the engineering building and a stamped electrical interconnection plan.",
+            targetDate: new Date("2026-10-01"),
+            status: "IN_PROGRESS",
+            orderIndex: 1,
+            subtasks: {
+              create: [
+                { title: "Draft single-line electrical diagram", description: "Panel → inverter → building tie-in, sized for a 3 kW array.", assigneeId: member.id, dueDate: new Date("2026-09-22"), status: "IN_PROGRESS", orderIndex: 0 },
+                { title: "Submit facilities permit request", description: "File the dig/site-use permit with campus facilities.", assigneeId: lead.id, dueDate: new Date("2026-09-26"), status: "NOT_STARTED", orderIndex: 1 },
+              ],
+            },
+          },
+          {
+            title: "Procure & install panels",
+            description: "Order panels, racking, and inverter; schedule the install weekend with volunteers.",
+            targetDate: new Date("2026-10-20"),
+            status: "NOT_STARTED",
+            orderIndex: 2,
+          },
         ],
       },
     },

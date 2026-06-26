@@ -31,6 +31,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
     "@prisma/client": "^6.2.1",
+    "exceljs": "^4.4.0",
     "lucide-react": "^1.21.0",
     "next": "15.1.4",
     "next-auth": "5.0.0-beta.25",

@@ -1,4 +1,4 @@
-import type { ProjectStatus } from "@prisma/client";
+import type { ProjectStatus, TimelineStatus } from "@prisma/client";
 
 /** Short date, e.g. "Oct 1, 2026". */
 export function fmtDate(d: Date | string | null | undefined): string {
@@ -52,3 +52,19 @@ export const STATUS_CHART_COLOR: Record<ProjectStatus, string> = {
 
 /** Eco-Tech series palette: sage / olive / earth. */
 export const CHART_COLORS = ["#5f8a4e", "#a1b887", "#b6cc9d", "#8c9680", "#c08a2b", "#b1543c"];
+
+// --- Semester-timeline status (deliverables + subtasks) ---------------------
+
+export const TIMELINE_STATUS_LABEL: Record<TimelineStatus, string> = {
+  NOT_STARTED: "Not started",
+  IN_PROGRESS: "In progress",
+  BLOCKED: "Blocked",
+  COMPLETE: "Complete",
+};
+
+export const TIMELINE_STATUS_BADGE_CLASS: Record<TimelineStatus, string> = {
+  NOT_STARTED: "badge-neutral",
+  IN_PROGRESS: "badge-at-risk",
+  BLOCKED: "badge-behind",
+  COMPLETE: "badge-on-track",
+};

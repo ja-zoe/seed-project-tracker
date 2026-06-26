@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { Crown } from "lucide-react";
 import { Permission } from "@prisma/client";
 import { requireUser } from "@/lib/session";
 import { can } from "@/lib/permissions";
 import { getVisibleProjects } from "@/lib/queries";
-import { milestoneProgress } from "@/lib/stats";
+import { deliverableProgress } from "@/lib/stats";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PageHeader, EmptyState, ProgressBar, LinkButton } from "@/components/ui";
 
@@ -31,15 +32,23 @@ export default async function ProjectsPage() {
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
           {projects.map((p) => {
-            const mp = milestoneProgress(p.milestones);
-            const leads = p.assignments.map((a) => a.user.name ?? a.user.email).join(", ");
+            const mp = deliverableProgress(p.deliverables);
+            const leadList = p.assignments.filter((a) => a.role === "LEAD");
+            const leads = leadList.map((a) => a.user.name ?? a.user.email).join(", ");
             return (
               <Link key={p.id} href={`/projects/${p.id}`} className="panel-light lift" style={{ display: "block" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
                   <h3 style={{ fontSize: 18, margin: 0 }}>{p.name}</h3>
                   <StatusBadge status={p.status} />
                 </div>
-                <p className="muted" style={{ fontSize: 13, margin: "6px 0 0" }}>{p.semester}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "6px 0 0", flexWrap: "wrap" }}>
+                  <p className="muted" style={{ fontSize: 13, margin: 0 }}>{p.semester}</p>
+                  {p.viewerIsLead ? (
+                    <span className="badge badge-on-track" title="You lead this project"><Crown size={12} /> You lead</span>
+                  ) : (
+                    <span className="badge badge-neutral">View only</span>
+                  )}
+                </div>
                 {p.description && (
                   <p style={{ fontSize: 14, marginTop: 8, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {p.description}
@@ -47,7 +56,7 @@ export default async function ProjectsPage() {
                 )}
                 <div style={{ marginTop: 14 }}>
                   <div className="muted" style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
-                    <span>{mp.completed}/{mp.total} milestones</span>
+                    <span>{mp.completed}/{mp.total} deliverables</span>
                     <span>{p._count.actionItems} open</span>
                   </div>
                   <ProgressBar value={mp.pct} />

@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   FolderKanban,
   ListChecks,
+  ListTodo,
   CalendarClock,
   Users,
   ShieldCheck,
@@ -24,6 +25,7 @@ import {
 const ICONS: Record<string, LucideIcon> = {
   dashboard: LayoutDashboard,
   projects: FolderKanban,
+  mytasks: ListTodo,
   actions: ListChecks,
   review: CalendarClock,
   users: Users,

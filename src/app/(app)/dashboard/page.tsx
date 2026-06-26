@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Flag } from "lucide-react";
+import { Flag, Crown } from "lucide-react";
 import { Permission } from "@prisma/client";
 import { requireUser } from "@/lib/session";
 import { can } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { getVisibleProjects } from "@/lib/queries";
-import { milestoneProgress, goalCompletionSeries } from "@/lib/stats";
+import { deliverableProgress, goalCompletionSeries } from "@/lib/stats";
 import { StatusBadge } from "@/components/StatusBadge";
 import { GoalCompletionChart } from "@/components/charts";
 import { PageHeader, StatCard, Section, EmptyState, ProgressBar, LinkButton } from "@/components/ui";
@@ -14,13 +14,14 @@ import { fmtDeadline } from "@/lib/format";
 /**
  * Home dashboard. Adapts to the viewer:
  *  - A PM sees the all-projects health grid + flags.
- *  - A lead sees their projects, open action items, and a submit-status CTA.
+ *  - A lead sees the projects they lead highlighted, plus others as read-only context.
+ *  - A general member sees a read-only view + the tasks assigned to them.
  */
 export default async function DashboardPage() {
   const user = await requireUser();
   const manager = can(user, Permission.MANAGE_PROJECTS);
 
-  const [projects, myActionItems] = await Promise.all([
+  const [projects, myActionItems, mySubtasks] = await Promise.all([
     getVisibleProjects(user),
     prisma.actionItem.findMany({
       where: { ownerId: user.id, status: "OPEN" },
@@ -28,7 +29,16 @@ export default async function DashboardPage() {
       include: { project: { select: { id: true, name: true } } },
       take: 8,
     }),
+    prisma.subtask.findMany({
+      where: { assigneeId: user.id, status: { not: "COMPLETE" } },
+      orderBy: [{ dueDate: "asc" }],
+      include: { deliverable: { select: { project: { select: { id: true, name: true } } } } },
+      take: 8,
+    }),
   ]);
+
+  const ledProjects = projects.filter((p) => p.viewerIsLead);
+  const otherProjects = projects.filter((p) => !p.viewerIsLead);
 
   // Goal-completion trend across the projects this user can see.
   const meetings = await prisma.meetingRecord.findMany({
@@ -41,16 +51,18 @@ export default async function DashboardPage() {
   const atRisk = projects.filter((p) => p.status === "AT_RISK");
   const series = goalCompletionSeries(meetings);
 
+  const description = manager
+    ? "Project health across the club at a glance. Flagged projects need attention first."
+    : ledProjects.length > 0
+      ? `You lead ${ledProjects.length} project${ledProjects.length === 1 ? "" : "s"}. Other projects you can see are shown as read-only context.`
+      : "Projects you can see across the club, plus the tasks assigned to you. You don't lead any projects yet.";
+
   return (
     <>
       <PageHeader
         eyebrow="Overview"
         title={`Welcome, ${user.name?.split(" ")[0] ?? "there"}`}
-        description={
-          manager
-            ? "Project health across the club at a glance. Flagged projects need attention first."
-            : "Your projects and what needs your attention this week."
-        }
+        description={description}
         actions={
           can(user, Permission.SUBMIT_STATUS_UPDATES) ? (
             <LinkButton href="/status/new" variant="primary">
@@ -62,7 +74,7 @@ export default async function DashboardPage() {
 
       {/* Stat row — dark focal card leads, colored metrics for risk/behind */}
       <div className="reveal reveal-1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 20 }}>
-        <StatCard label="Projects" value={projects.length} dark />
+        <StatCard label={manager ? "Projects" : "Visible projects"} value={projects.length} dark />
         <StatCard label="On track" value={projects.filter((p) => p.status === "ON_TRACK").length} accent="var(--on-track)" />
         <StatCard label="At risk" value={atRisk.length} accent="var(--at-risk)" />
         <StatCard label="Behind" value={flagged.length} accent="var(--behind)" hint={flagged.length ? "Needs a corrective plan" : undefined} />
@@ -87,45 +99,65 @@ export default async function DashboardPage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", gap: 20, alignItems: "start" }} className="dashboard-grid">
         {/* Projects health */}
-        <Section
-          title={manager ? "All projects" : "My projects"}
-          action={<Link href="/projects" className="brand-text" style={{ fontSize: 14, textDecoration: "underline" }}>View all</Link>}
-        >
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           {projects.length === 0 ? (
-            <EmptyState
-              title="No projects yet"
-              description={manager ? "Create your first project to start tracking the semester." : "You haven't been assigned to a project yet."}
-              action={manager ? <LinkButton href="/projects/new" variant="primary">+ New project</LinkButton> : undefined}
-            />
+            <Section title="Projects">
+              <EmptyState
+                title="No projects yet"
+                description={manager ? "Create your first project to start tracking the semester." : "You haven't been added to a project yet."}
+                action={manager ? <LinkButton href="/projects/new" variant="primary">+ New project</LinkButton> : undefined}
+              />
+            </Section>
+          ) : manager ? (
+            <Section
+              title="All projects"
+              action={<Link href="/projects" className="brand-text" style={{ fontSize: 14, textDecoration: "underline" }}>View all</Link>}
+            >
+              <ProjectList projects={projects} />
+            </Section>
           ) : (
-            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-              {projects.map((p) => {
-                const mp = milestoneProgress(p.milestones);
-                return (
-                  <li key={p.id}>
-                    <Link href={`/projects/${p.id}`} className="panel-light lift" style={{ display: "block", padding: 16 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                        <span className="heading-text" style={{ fontWeight: 500 }}>{p.name}</span>
-                        <StatusBadge status={p.status} />
-                      </div>
-                      <div style={{ marginTop: 10 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }} className="muted">
-                          <span>{mp.completed}/{mp.total} milestones</span>
-                          <span>{p._count.actionItems} open action items</span>
-                        </div>
-                        <div style={{ marginTop: 6 }}>
-                          <ProgressBar value={mp.pct} />
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <>
+              {ledProjects.length > 0 && (
+                <Section
+                  title={`Projects you lead · ${ledProjects.length}`}
+                  action={<Link href="/projects" className="brand-text" style={{ fontSize: 14, textDecoration: "underline" }}>View all</Link>}
+                >
+                  <ProjectList projects={ledProjects} />
+                </Section>
+              )}
+              {otherProjects.length > 0 && (
+                <Section title={`Viewing (read-only) · ${otherProjects.length}`}>
+                  <ProjectList projects={otherProjects} />
+                </Section>
+              )}
+            </>
           )}
-        </Section>
+        </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* My assigned subtasks (timeline) */}
+          <Section
+            title="My assigned tasks"
+            action={<Link href="/my-tasks" className="brand-text" style={{ fontSize: 14, textDecoration: "underline" }}>View all</Link>}
+          >
+            {mySubtasks.length === 0 ? (
+              <p className="muted" style={{ fontSize: 14 }}>No timeline tasks assigned to you.</p>
+            ) : (
+              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                {mySubtasks.map((s) => (
+                  <li key={s.id} style={{ fontSize: 14 }}>
+                    <Link href={`/projects/${s.deliverable.project.id}`} className="heading-text" style={{ fontWeight: 500 }}>
+                      {s.title}
+                    </Link>
+                    <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
+                      {s.deliverable.project.name} · {fmtDeadline(s.dueDate)}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Section>
+
           {/* My action items */}
           <Section title="My open action items">
             {myActionItems.length === 0 ? (
@@ -152,5 +184,42 @@ export default async function DashboardPage() {
         </div>
       </div>
     </>
+  );
+}
+
+/** Project cards with a clear ownership badge on the ones the viewer leads. */
+function ProjectList({
+  projects,
+}: {
+  projects: (Awaited<ReturnType<typeof getVisibleProjects>>)[number][];
+}) {
+  return (
+    <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+      {projects.map((p) => {
+        const mp = deliverableProgress(p.deliverables);
+        return (
+          <li key={p.id}>
+            <Link href={`/projects/${p.id}`} className="panel-light lift" style={{ display: "block", padding: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                <span className="heading-text" style={{ fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  {p.name}
+                  {p.viewerIsLead && <span className="badge badge-on-track" title="You lead this project"><Crown size={12} /> You lead</span>}
+                </span>
+                <StatusBadge status={p.status} />
+              </div>
+              <div style={{ marginTop: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }} className="muted">
+                  <span>{mp.completed}/{mp.total} deliverables</span>
+                  <span>{p._count.actionItems} open action items</span>
+                </div>
+                <div style={{ marginTop: 6 }}>
+                  <ProgressBar value={mp.pct} />
+                </div>
+              </div>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

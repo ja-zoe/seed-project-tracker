@@ -41,6 +41,24 @@ enum ActionItemStatus {
   DONE
 }
 
+/// Status used by both levels of the semester timeline (deliverables + subtasks).
+/// COMPLETE keeps the `completed` boolean in sync on a Deliverable so the
+/// existing red-flag/health detection keeps working unchanged.
+enum TimelineStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  BLOCKED
+  COMPLETE
+}
+
+/// A user's role on a single project. Leads run the project (and appear in the
+/// "led by" view); general members are people work can be delegated to via
+/// subtask assignment and who get a read-only member view.
+enum ProjectMemberRole {
+  LEAD
+  MEMBER
+}
+
 /// Granular permission flags. A Role grants a set of these. Custom roles are
 /// just different combinations the PM assembles in the role builder.
 enum Permission {
@@ -126,11 +144,12 @@ model User {
   sessions Session[]
 
   // Domain relations
-  assignments     ProjectAssignment[]
-  statusUpdates   StatusUpdate[]
-  meetingRecords  MeetingRecord[]     @relation("RecordedBy")
-  ownedActionItems ActionItem[]       @relation("ActionItemOwner")
-  notifications   Notification[]
+  assignments      ProjectAssignment[]
+  statusUpdates    StatusUpdate[]
+  meetingRecords   MeetingRecord[]     @relation("RecordedBy")
+  ownedActionItems ActionItem[]        @relation("ActionItemOwner")
+  assignedSubtasks Subtask[]           @relation("SubtaskAssignee")
+  notifications    Notification[]
 }
 
 model Account {
@@ -184,36 +203,72 @@ model Project {
   updatedAt            DateTime      @updatedAt
 
   assignments    ProjectAssignment[]
-  milestones     Milestone[]
+  deliverables   Deliverable[]
   statusUpdates  StatusUpdate[]
   meetingRecords MeetingRecord[]
   actionItems    ActionItem[]
 }
 
-/// Join table: which users lead which projects.
+/// Join table: a user's membership on a project. `role` distinguishes leads
+/// (who run the project) from general members (who get delegated subtasks and a
+/// read-only member view). Existing rows default to LEAD.
 model ProjectAssignment {
-  id        String   @id @default(cuid())
+  id        String            @id @default(cuid())
   projectId String
   userId    String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  role      ProjectMemberRole @default(LEAD)
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime          @default(now())
 
   @@unique([projectId, userId])
 }
 
-model Milestone {
-  id            String    @id @default(cuid())
+/// A major deliverable on the semester timeline — a big, overarching milestone
+/// (e.g. "Prototype validated"). Holds a well-defined engineering goal and a set
+/// of nested subtasks. The `completed`/`completedDate` fields remain the
+/// canonical "done" signal used by red-flag health detection; `status` adds the
+/// richer in-between states (in progress / blocked) for the timeline UI.
+model Deliverable {
+  id            String         @id @default(cuid())
   projectId     String
-  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   title         String
-  targetDate    DateTime
-  completed     Boolean   @default(false)
+  description   String?        @db.Text // detailed, well-defined goal & acceptance criteria
+  status        TimelineStatus @default(NOT_STARTED)
+  startDate     DateTime? // when work on the deliverable begins
+  targetDate    DateTime // due / target date the milestone is measured against
+  completed     Boolean        @default(false)
   completedDate DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  orderIndex    Int            @default(0) // manual ordering along the timeline
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  subtasks Subtask[]
 
   @@index([projectId])
+}
+
+/// A subtask/step needed to complete a deliverable. Assignable to any member of
+/// the project (lead or general member) so work can be delegated and tracked.
+model Subtask {
+  id            String         @id @default(cuid())
+  deliverableId String
+  deliverable   Deliverable    @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?        @db.Text // what "done" looks like for this step
+  status        TimelineStatus @default(NOT_STARTED)
+  startDate     DateTime?
+  dueDate       DateTime?
+  orderIndex    Int            @default(0)
+  assigneeId    String?
+  assignee      User?          @relation("SubtaskAssignee", fields: [assigneeId], references: [id])
+  completedAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([deliverableId])
+  @@index([assigneeId, status])
 }
 
 // ---------------------------------------------------------------------------
