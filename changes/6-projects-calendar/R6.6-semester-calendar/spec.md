@@ -1,6 +1,6 @@
 # R6.6 — Semester Calendar
 
-**Status:** tests passing
+**Status:** in progress
 **Files:**
 - `prisma/schema.prisma` + DB DDL (new `CalendarEvent`, new `CalendarEventType` enum,
   `MANAGE_CALENDAR` permission), `prisma/seed.ts` (grant `MANAGE_CALENDAR` to PM role)

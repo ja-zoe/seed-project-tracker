@@ -3,9 +3,9 @@
 Run all; mark each pass/fail during verification. Merge only when all pass and the app boots.
 
 ## Build / schema
-- [ ] DDL applied via `tsx scripts/apply-schema.ts` (enum `ADD VALUE` standalone), `schema.prisma`
+- [x] DDL applied via `tsx scripts/apply-schema.ts` (enum `ADD VALUE` standalone), `schema.prisma`
       synced, `pnpm prisma generate` clean, dev server restarted.
-- [ ] `pnpm build` / typecheck passes.
+- [x] `pnpm build` / typecheck passes.
 - [ ] `pnpm db:seed` re-run: the "Project Manager" role now includes `MANAGE_CALENDAR`.
 
 ## Permissions
