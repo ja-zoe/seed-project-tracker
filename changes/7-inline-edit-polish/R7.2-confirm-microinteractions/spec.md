@@ -1,6 +1,6 @@
 # R7.2 — Confirm microinteractions
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/sortable-deliverables.tsx`
 - `src/app/globals.css`
@@ -49,11 +49,11 @@ No DB changes; no new server actions. Commit/revert still go through the existin
 
 ## Tests
 
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright `r7-confirm-in`: after picking a new status, the `InlineConfirm` controls are
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright `r7-confirm-in`: after picking a new status, the `InlineConfirm` controls are
       present and reach `opacity-100` / non-zero width (assert the expanded classes / computed
       opacity); screenshot the revealed `✓ | ✗`
-- [ ] Playwright `r7-confirm-commit`: clicking `✓` settles the pill to the new status (correct
+- [x] Playwright `r7-confirm-commit`: clicking `✓` settles the pill to the new status (correct
       label + `STATUS_DOT_COLOR` bg); clicking `✗` on another reverts to the original status
 - [ ] App (manual — headless can't assert "smoothness"): select→confirm and confirm→result
       transitions are visibly smooth (~150–200 ms), not instant snaps
