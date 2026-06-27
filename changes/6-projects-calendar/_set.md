@@ -10,7 +10,7 @@ This file is the index and roll-up log for set 6. Per-feature specs live in the 
 - [~] R6.2 — Project CRUD — edit page + delete action (app); `create_project`/`update_project` MCP tools, MANAGE_PROJECTS-gated
 - [~] R6.3 — Inline subtask status — change a subtask's status from the project page without opening the edit form
 - [~] R6.4 — Project dates — add `startDate`/`endDate` to Project; show duration; end blank ⇒ "Present"
-- [ ] R6.5 — Timeline fix — remove visual artifacts in the deliverable Gantt (misaligned today line, null-start bars, single-date range)
+- [~] R6.5 — Timeline fix — remove visual artifacts in the deliverable Gantt (misaligned today line, null-start bars, single-date range)
 - [ ] R6.6 — Semester Calendar — new `/calendar` view of project + non-project meetings, editable by MANAGE_CALENDAR holders
 
 ## Open questions / decisions before implementing
