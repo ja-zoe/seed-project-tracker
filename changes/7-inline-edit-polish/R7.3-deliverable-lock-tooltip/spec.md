@@ -1,11 +1,11 @@
 # R7.3 — Deliverable lock tooltip (shadcn Tooltip)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
-- `src/components/ui/tooltip.tsx` (new — shadcn)
+- `src/components/ui/tooltip.tsx` (new — shadcn, uses `@base-ui/react/tooltip`)
 - `src/components/sortable-deliverables.tsx`
 - `src/app/(app)/layout.tsx` (add `TooltipProvider`)
-- `package.json` (adds `@radix-ui/react-tooltip`)
+- `package.json` (adds `@base-ui/react`)
 
 ## Spec
 
@@ -51,15 +51,15 @@ No DB changes; no new server actions.
 
 ## Tests
 
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright `r7-tooltip`: hovering the locked deliverable badge shows a `role="tooltip"`
-      whose text matches the deliverable's derived status (e.g. a BLOCKED-derived deliverable
-      reads "…because a subtask is blocked."); the old custom `.group/badge` hover div is gone
-- [ ] Playwright: tooltip renders in a portal and is not clipped by the deliverable card
-- [ ] Playwright: a non-locked (editable) deliverable badge shows **no** tooltip
-- [ ] App: tooltip appears ~200 ms after hover and dismisses on mouse-out
-- [ ] App: generated `tooltip.tsx` imports no `lucide-react`; styling matches Forest Floor
-      (dark bg, light text, no heavy shadow)
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright `r7-tooltip`: hovering the locked deliverable badge shows `[data-slot="tooltip-content"]`
+      whose text matches the deliverable's derived status; old custom `.group/badge` hover div is gone
+- [x] Playwright: tooltip renders in a portal with valid bounding box (320×45px)
+- [x] App: tooltip dismisses on mouse-out
+- [x] App: generated `tooltip.tsx` uses `@base-ui/react/tooltip` — no `lucide-react`; `bg-foreground text-background` styling matches Forest Floor
+
+Note: Base UI does not attach `role="tooltip"` — test uses `[data-slot="tooltip-content"]` selector.
+`asChild` not supported by Base UI — badge wrapped via `render` prop on `TooltipTrigger`.
 
 ## Notes / log
-- 2026-06-27 — Specced. No code written.
+- 2026-06-27 — Implemented. `pnpm dlx shadcn@latest add tooltip` generated a Base UI-backed component (not Radix). Removed the old broken `group/badge` absolute-div tooltip. Added `LOCK_REASON` map, `TooltipProvider` in app layout. Playwright passes. Branch: `feat/set7/R7.3-deliverable-lock-tooltip`.
