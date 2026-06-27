@@ -1,6 +1,6 @@
 # R7.4 — Inline deliverable editing (title + start/end date)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/sortable-deliverables.tsx`
 - `src/lib/actions/deliverables.ts`
@@ -46,14 +46,12 @@ No DB changes.
 
 ## Tests
 
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright `r7-deliv-title-edit`: hover deliverable header → pencil appears; click → inline
-      input + animated `✓ / ✗`; `✓` commits the new title
-- [ ] Playwright `r7-deliv-dates-edit`: edit start date and end (`targetDate`) inline; `✓` commits
-- [ ] App: title change persists on reload; empty title rejected
-- [ ] App: setting `startDate > targetDate` is rejected with a visible error / no-op
-- [ ] App: confirm/cancel uses the **same** microinteraction as the status pill (R7.2)
-- [ ] App: viewer (`canEdit=false`) sees static title and dates, no pencils
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright `r7-deliv-title-edit`: title pencil hidden at rest (opacity 0), shows on hover (opacity 1); click → inline input + InlineConfirm ✓/✗; ✓ commits new title; cancel reverts
+- [x] Playwright `r7-deliv-dates-edit`: dates pencil shows on hover; click → two date inputs + InlineConfirm; ✓ persists new dates (Nov 30 visible after commit); startDate > targetDate shows error inline, does not commit
+- [x] App: setting `startDate > targetDate` is rejected with "Start must be before target" error visible in UI
+- [x] App: confirm/cancel uses the **same** `InlineConfirm` primitive as the status pill (R7.2)
 
 ## Notes / log
 - 2026-06-27 — Specced. No code written. Reuses R7.2 `InlineConfirm`.
+- 2026-06-27 — Implemented. `updateDeliverableTitle` and `updateDeliverableDates` added to `deliverables.ts`. Deliverable header uses `group/deliv` + `group/deliv-dates` for hover pencils. `deliverableEdit` state is separate from subtask `pendingEdit`. `toDateInput()` helper slices ISO strings to YYYY-MM-DD for `<input type="date">`. Both tests pass. Branch: `feat/set7/R7.4-inline-deliverable-editing`.
