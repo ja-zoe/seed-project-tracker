@@ -12,7 +12,7 @@ and extending inline editing to deliverable fields. All features touch
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
 - [t] R7.1 — Subtask row polish — restore the far-left status bullet (visual only, glows on hover/edit); more vertical padding on the status pill; reassign by clicking the assignee name (remove the separate UserCircle button)
-- [ ] R7.2 — Confirm microinteractions — animated select→confirm and confirm→result transitions; shared `InlineConfirm` primitive (consumed by R7.4)
+- [t] R7.2 — Confirm microinteractions — animated select→confirm and confirm→result transitions; shared `InlineConfirm` primitive (consumed by R7.4)
 - [ ] R7.3 — Deliverable lock tooltip — replace the broken custom hover tooltip with the shadcn Tooltip component
 - [ ] R7.4 — Inline deliverable editing — edit deliverable title, start date, and end date (`targetDate`) inline using the R7.2 microinteraction
 

@@ -105,13 +105,13 @@ test.describe("R7.1 — subtask row polish", () => {
       "rgb(88, 129, 87)",   // COMPLETE
     ]).toContain(bulletBg);
 
-    // 2. Pill padding — py-1 (4px top+bottom in px)
-    const pill = firstRow.locator('[data-testid="status-pill"]').first();
-    if ((await pill.count()) > 0) {
-      const pillPaddingTop = await pill.evaluate(
+    // 2. Pill padding — py-1 (4px top+bottom in px) — measured on the container
+    const pillContainer = firstRow.locator('[data-testid="status-pill-container"]').first();
+    if ((await pillContainer.count()) > 0) {
+      const pillPaddingTop = await pillContainer.evaluate(
         (el) => parseFloat(window.getComputedStyle(el).paddingTop)
       );
-      console.log("  Pill padding-top:", pillPaddingTop, "px");
+      console.log("  Pill container padding-top:", pillPaddingTop, "px");
       expect(pillPaddingTop).toBeGreaterThanOrEqual(4); // py-1 = 4px
     }
 
