@@ -18,6 +18,14 @@ on `src/components/sortable-deliverables.tsx` + `src/lib/actions/deliverables.ts
 - [t] R9.4 — Deliverable description expand + inline edit — clicking the deliverable body (not a control) shows its description; edit it inline (Markdown or plain) without a modal
 - [t] R9.5 — Deliverable priority — new editable `priority` field, inline in the header and in the edit modal (**DB change**)
 - [t] R9.6 — Group filter + within-group ordering — filter deliverables by group; reorder within a group; default sort is by priority (highest at top)
+- [ ] R9.7 — Subtask description inline edit — edit a subtask's description inline (Markdown/plain) in the expanded region, like the deliverable description (R9.4)
+- [ ] R9.8 — Project edit modal — convert the `/projects/[id]/edit` screen into a modal (mirrors R9.1/R8.1)
+- [ ] R9.9 — Status-confirm contrast — the confirm ✓ is invisible on the COMPLETE (green) status pill; make it legible on any pill color
+- [ ] R9.10 — e2e test cleanup — tag test projects and auto-delete them after the run (no manual cleanup)
+
+**Added 2026-06-28 (round 2):** R9.7–R9.10 — editing-UX/bug/test refinements requested by the user
+alongside the new Set 10 (calendar/status) work. Set 9 reopens until these ship; then R9.1–R9.10 merge
+to `main` together.
 
 ## Sequencing & file overlap
 - Every feature touches `src/components/sortable-deliverables.tsx` and/or `deliverables.ts`, so they
