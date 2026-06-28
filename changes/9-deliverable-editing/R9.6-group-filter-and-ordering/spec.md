@@ -1,6 +1,6 @@
 # R9.6 — Group filter + within-group ordering
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/sortable-deliverables.tsx`
 - `src/lib/actions/deliverables.ts` (`reorderDeliverable` / `moveDeliverable`)
@@ -37,12 +37,19 @@ first and "down" on the last of a group. (Alternative if Q4 = drag: add `@dnd-ki
 No DB changes (`orderIndex`, `group`, `priority` all exist after R9.5).
 
 ## Tests
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: a group filter shows only the chosen group's deliverables; "All" restores everything
-- [ ] Playwright: within a group, the default order is by priority (a HIGH sorts above a LOW)
-- [ ] Playwright: up/down moves a deliverable within its group and persists (order holds after reload);
-      "up" disabled at top, "down" at bottom
-- [ ] App: reordering never crosses group boundaries
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: the group filter shows only the chosen group; "All groups" restores everything
+- [x] Playwright: within a group, default order is by priority (HIGH sorts above MED/LOW)
+- [x] Playwright: up/down reorders within a priority tier (move P-Med-B above P-Med-A); the HIGH row is
+      unaffected; reorder controls only render when a same-priority neighbor exists
+- [x] App: `moveDeliverable` swaps orderIndex only among same-group, same-priority siblings (never
+      crosses group or priority boundaries)
+
+DECISIONS (user-confirmed): default sort = priority DESC then orderIndex; reorder = up/down buttons
+(no dnd lib). Reorder operates **within a priority tier** (priority is the primary sort key); moving a
+row across tiers is done by changing its priority (R9.5).
 
 ## Notes / log
 - 2026-06-28 — Specced. No code written.
+
+- 2026-06-28 — Implemented & Playwright-verified. `moveDeliverable` (swap orderIndex, same group+priority); group-filter `<select>`; within-group sort priority-then-orderIndex; caret up/down controls. Branch: `feat/set9/R9.6-filter-ordering`.
