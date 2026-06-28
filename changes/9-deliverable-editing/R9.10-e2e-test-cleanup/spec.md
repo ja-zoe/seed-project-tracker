@@ -1,6 +1,6 @@
 # R9.10 — Clean up e2e test projects automatically
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `e2e/helpers.ts` (mark test projects)
 - `e2e/global-teardown.ts` (new)
@@ -31,10 +31,14 @@ up in the database — the user has to delete them manually. Tests should clean 
 (Prisma), not the UI. Per `CONTEXT.md`, DB access uses the pooler connection string already in `.env`.
 
 ## Tests
-- [ ] `pnpm build` / typecheck passes (teardown is TS, compiled by Playwright)
-- [ ] Manual: run the full e2e suite, then query `Project` — **no** projects whose name starts with the
-      marker remain; the user's real (unmarked) projects are untouched
-- [ ] Manual: the one-time cleanup removed the pre-existing leftover test projects
+- [x] `pnpm build` / typecheck passes; teardown runs after the suite
+- [x] Verified: after a run, the teardown logged "deleted N test project(s)" and **no** marker-tagged
+      projects remain; the user's real projects (Biodiversity, RAMEN) are untouched
+- [x] One-time cleanup removed the 32 pre-existing leftover test projects (kept the 2 real ones)
+- [x] Hardened: the 5 "reuse an existing project" helpers now always create a fresh marker-tagged
+      project, so tests never mutate real projects (a risk introduced once the DB was cleaned)
 
 ## Notes / log
 - 2026-06-28 — Specced. No code written.
+
+- 2026-06-28 — Implemented. `E2E_MARKER`-tagged project names + `e2e/global-teardown.ts` (Prisma `deleteMany` by marker, registered in `playwright.config.ts`). All inline creators tagged; reuse-helpers create fresh. One-time deleted 32 legacy test projects. Branch: `feat/set9/R9.10-test-cleanup`.

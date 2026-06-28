@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
+import { E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -27,7 +28,7 @@ test.describe("R8.6 — status update submission (Prisma null constraint fix)", 
 
     // Create project
     await page.goto("/projects/new");
-    await page.fill('input[name="name"]', `R8.6 ${Date.now()}`);
+    await page.fill('input[name="name"]', E2E_MARKER + `R8.6 ${Date.now()}`);
     await page.fill('input[name="semester"]', "Test 2026");
     await page.getByRole("button", { name: "Create Project" }).click();
     await page.waitForURL(

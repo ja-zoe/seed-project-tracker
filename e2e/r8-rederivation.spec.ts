@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
-import { addSubtaskViaModal } from "./helpers";
+import { addSubtaskViaModal, E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -22,7 +22,7 @@ async function shot(page: Page, name: string) {
 
 async function setup(page: Page): Promise<{ projectUrl: string; deliverableId: string }> {
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', `R8.4 ${Date.now()}`);
+  await page.fill('input[name="name"]', E2E_MARKER + `R8.4 ${Date.now()}`);
   await page.fill('input[name="semester"]', "Test 2026");
   await page.getByRole("button", { name: "Create Project" }).click();
   await page.waitForURL(
