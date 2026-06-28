@@ -23,7 +23,7 @@ meeting types with role-based visibility, makes the status-submit window configu
       **edit/delete** their own update **before** the meeting/due time; late submissions are allowed but
       **marked late**; after due, leads can't edit; users with the right permission can **edit/delete**
       any status update at any time — inline, with the deliverable/subtask **confirm microinteractions**
-- [ ] R10.3 — Calendar export — export a user's calendar to **Google Calendar** and as an **ICS** file;
+- [t] R10.3 — Calendar export — export a user's calendar to **Google Calendar** and as an **ICS** file;
       a general member's export **excludes** lead/eboard meetings
 
 ## Sequencing & file overlap
