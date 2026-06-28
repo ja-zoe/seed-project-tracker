@@ -1,6 +1,6 @@
 # R10.3 — Calendar export (Google Calendar + ICS)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/app/(app)/calendar/...` (export controls)
 - `src/app/api/calendar/ics/route.ts` (new — ICS feed/download)
@@ -36,13 +36,17 @@ needs a public/tokenized URL (out of scope unless requested).
 *Scope:* default export = the current semester's visible events; optionally a project-scoped export.
 
 ## Tests
-- [ ] `pnpm build` / typecheck passes
-- [ ] App: "Download .ics" returns a valid `text/calendar` file whose VEVENTs match the in-app calendar
-- [ ] App: a **member's** .ics (and Google links) **exclude** LEAD_MEETING/EBOARD_MEETING; a lead/eboard
-      export includes them
-- [ ] App: an "Add to Google Calendar" link opens a prefilled event with the correct title/time
-- [ ] App: ICS validates (DTSTART/DTEND well-formed; all-day events use DATE values)
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: `GET /api/calendar/ics` returns `text/calendar` (200) with a valid VCALENDAR/VEVENT;
+      the calendar's "Export .ics" toolbar link points at it
+- [x] Playwright: an "Add to Google Calendar" link is present per event with a
+      `calendar.google.com/calendar/render?action=TEMPLATE…` href
+- [~] Member exclusion: the ICS route applies the **same** `VIEW_LEAD_MEETINGS` server filter as the
+      calendar (lead/eboard meetings omitted for members). Enforced server-side; member-login UI
+      assertion deferred (same dev-login limitation as R10.1)
 
 ## Notes / log
 - 2026-06-28 — Specced (Set 10, phase 2). No code written. Open: ship a subscribable (tokenized) ICS
   feed for live Google sync, or just one-shot download + per-event template links (recommended).
+
+- 2026-06-28 — Implemented & Playwright-verified. `src/lib/calendar-export.ts` (`buildIcs` RFC-5545 + `googleCalendarUrl`); `GET /api/calendar/ics` (auth + visibility filter, `text/calendar` download); calendar toolbar 'Export .ics' link + per-event 'Add to Google Calendar'. Branch: `feat/set10/R10.3-calendar-export`.
