@@ -76,11 +76,11 @@ this also updates R7.4's deliverable title/date confirms — consistent across t
 surface.
 
 **Round-2 tests:**
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: after picking a status, the pill's confirm/cancel buttons render `svg` icons (not
-      a `✓`/`✗` text node); the confirm button's icon matches the subtask edit panel's `CheckFat`
-- [ ] Playwright: clicking the icon-confirm still commits the status (label + bg update); cancel reverts
-- [ ] App: the pill confirm icons visually match the row's edit-panel icons (same glyph, weight, green)
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: after picking a status, the pill's confirm/cancel buttons render `svg` icons (not
+      a `✓`/`✗` text node); confirm icon color is `rgb(88,129,87)` (`#588157`, matching `CheckFat` panel)
+- [x] Playwright: clicking the icon-confirm still commits the status (label + bg update); cancel reverts
+- [x] App: the pill confirm icons (CheckFat fill green + XCircle bold) match the row's edit-panel icons
 
 ## Notes / log
 - 2026-06-27 — Specced. No code written. Establishes the `InlineConfirm` primitive reused by R7.4.
