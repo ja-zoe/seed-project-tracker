@@ -95,7 +95,9 @@ a pending label while the enclosing `<form action=…>` is submitting. The statu
 deliverable/subtask edit pages.)
 
 **Round-2 tests:**
-- [ ] `pnpm build` / typecheck passes
-- [ ] App/Playwright: on submit, the button shows the pending label and is disabled until the redirect;
-      a complete submission still creates the row and returns to the project (no regression vs the
-      round-1 fix)
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright (`r8-r2-loading`): with the submit POST delayed, the button shows "Submitting…" and is
+      **disabled**; the submission then completes and redirects to the project (no `PrismaClientKnownRequestError`)
+
+Implemented by swapping the plain submit button for `<SubmitButton label="Submit Update"
+pendingLabel="Submitting…" …>` (already `useFormStatus`-based). No other change.
