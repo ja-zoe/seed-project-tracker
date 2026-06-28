@@ -93,6 +93,11 @@ test.describe("R7.3 — deliverable lock tooltip (shadcn)", () => {
     const oldTooltipDiv = page.locator('.group\\/badge .absolute.bottom-full');
     await expect(oldTooltipDiv).toHaveCount(0);
 
+    // R7.3 round-2: no cursor change on the locked badge (was cursor-help)
+    const badgeCursor = await lockedBadge.evaluate((el) => window.getComputedStyle(el).cursor);
+    console.log("  Locked badge cursor:", badgeCursor);
+    expect(badgeCursor).not.toBe("help");
+
     // ── Hover the locked badge → tooltip should appear ─────────────────────
     await lockedBadge.hover();
     // Base UI tooltip has a delay, wait for it to open

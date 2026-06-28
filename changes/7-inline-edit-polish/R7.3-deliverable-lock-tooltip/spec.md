@@ -71,9 +71,9 @@ tooltip.
 Tooltip still triggers on hover; only the cursor styling changes.
 
 **Round-2 tests:**
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: the locked badge's computed `cursor` is not `help` (default/`auto`); the tooltip
-      still appears on hover with the correct `LOCK_REASON` text
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: the locked badge's computed `cursor` is not `help`; the tooltip still appears on
+      hover with the correct `LOCK_REASON` text
 
 ## Notes / log
 - 2026-06-27 — Implemented. `pnpm dlx shadcn@latest add tooltip` generated a Base UI-backed component (not Radix). Removed the old broken `group/badge` absolute-div tooltip. Added `LOCK_REASON` map, `TooltipProvider` in app layout. Playwright passes. Branch: `feat/set7/R7.3-deliverable-lock-tooltip`.
