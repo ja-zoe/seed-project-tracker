@@ -16,7 +16,7 @@ plus a new bulk project-delete for PMs).
 - [ ] R8.2 — Expandable subtask description — clicking a subtask row expands it to show its description, pushing siblings down
 - [ ] R8.3 — Subtask due-date bounds & year — bound a subtask's due date by the deliverable's start/target dates; show the year in due-date labels when it isn't the current year
 - [t] R8.4 — Deliverable status re-derivation (bug) — adding/deleting a subtask must recompute the parent deliverable's derived status, not just status edits
-- [ ] R8.5 — Bulk project delete — `MANAGE_PROJECTS` users can multi-select projects in the list and delete them together
+- [t] R8.5 — Bulk project delete — `MANAGE_PROJECTS` users can multi-select projects in the list and delete them together
 - [t] R8.6 — Status-update Prisma null constraint (bug) — `prisma.statusUpdate.create()` throws a null-constraint error on submit; diagnose the live-table drift and fix
 
 ## Sequencing & file overlap

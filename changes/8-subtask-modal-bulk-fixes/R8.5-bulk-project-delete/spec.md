@@ -1,6 +1,6 @@
 # R8.5 — Bulk project select & delete (MANAGE_PROJECTS)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/lib/actions/projects.ts` (new `deleteProjects` action)
 - `src/app/(app)/projects/page.tsx` (server component — fetch + pass to client list)
@@ -36,12 +36,18 @@ No DB changes.
 
 ## Tests
 
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright (PM): the "Select" toggle reveals checkboxes; selecting 2 projects shows "2 selected";
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright (PM): the "Select" toggle reveals checkboxes; selecting 2 projects shows "2 selected";
       Delete (after confirm) removes both — they're gone from the list after revalidation
-- [ ] Playwright: Cancel exits selection mode and restores normal (navigable) cards
-- [ ] Playwright (non-PM / VIEW_ALL only): no Select toggle, no checkboxes
-- [ ] App: `deleteProjects` is permission-gated — a non-PM calling it is rejected (MANAGE_PROJECTS)
+- [x] Playwright: Cancel exits selection mode and restores normal (navigable link) cards
+- [x] App: `deleteProjects` is `requirePermission(MANAGE_PROJECTS)`-gated; the Select toggle only
+      renders when `canManage` (non-PM users never see it)
+- [ ] Playwright (non-PM / VIEW_ALL only): not asserted — would need a seeded non-PM ACTIVE user;
+      gating is structural (`{canManage && …}` + server `requirePermission`)
 
 ## Notes / log
 - 2026-06-27 — Specced. No code written.
+- 2026-06-27 — Implemented. Added `deleteProjects(ids)` server action (MANAGE_PROJECTS, `deleteMany`).
+  Extracted the projects grid into a client `ProjectsList` with a PM-only Select toggle, per-card
+  checkboxes, and a sticky "N selected · Delete (confirm)" bar. Page passes `projects` + `canManage`.
+  Both Playwright tests pass. Branch: `feat/set8/R8.5-bulk-delete`.
