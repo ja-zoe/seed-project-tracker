@@ -66,3 +66,6 @@ the generated file imports no `lucide-react` (Lucide is banned — see `CONTEXT.
 
 ## Log
 - 2026-06-27 — Set 8 scaffolded; R8.1–R8.6 specced. No code written.
+- 2026-06-27 — All R8.1–R8.6 implemented, Playwright-verified, and merged into the set branch
+  (`feat/set8-subtask-modal-bulk-fixes`). Full e2e suite (16 tests) green; `pnpm build` clean.
+  Awaiting the user's final review before merging to `main` (order: set 6 → set 7 → set 8).
