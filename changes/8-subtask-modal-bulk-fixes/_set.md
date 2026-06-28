@@ -12,12 +12,12 @@ plus a new bulk project-delete for PMs).
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [~] R8.1 — Subtask modal **[round 2: modal description supports Markdown/plain]**
-- [~] R8.2 — Expandable subtask description **[round 2: render description as Markdown; click anywhere on the row (not a control) toggles it]**
+- [t] R8.1 — Subtask modal **[round 2 done: modal description Markdown/plain]**
+- [t] R8.2 — Expandable subtask description **[round 2 done: Markdown render + click-anywhere-on-row]**
 - [t] R8.3 — Subtask due-date bounds & year — bound a subtask's due date by the deliverable's start/target dates; show the year in due-date labels when it isn't the current year
 - [t] R8.4 — Deliverable status re-derivation (bug) — adding/deleting a subtask must recompute the parent deliverable's derived status, not just status edits
 - [t] R8.5 — Bulk project delete — `MANAGE_PROJECTS` users can multi-select projects in the list and delete them together
-- [~] R8.6 — Status-update Prisma null constraint (bug) **[round 2: add a loading state to the submit button]**
+- [t] R8.6 — Status-update Prisma null constraint (bug) **[round 2 done: submit loading state]**
 
 ## Sequencing & file overlap
 - **R8.1, R8.2, R8.3, R8.4** all touch the subtask surface (`src/components/sortable-deliverables.tsx`
