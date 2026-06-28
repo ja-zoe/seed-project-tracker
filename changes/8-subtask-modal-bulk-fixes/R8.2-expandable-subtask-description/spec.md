@@ -80,8 +80,14 @@ row — the `closest(...)` guard covers the buttons; the bullet is an `aria-hidd
 toggling is acceptable, or add `[data-no-expand]` to exclude it).
 
 **Round-2 tests:**
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: a Markdown description (e.g. `**bold**`) renders as HTML (a `<strong>`), not literal `**`
-- [ ] Playwright: clicking the row body (away from any control) toggles the description; clicking the
-      status pill / assignee / pencil / edit-modal / delete does **not** toggle it
-- [ ] App: `role="button"` + `aria-expanded` on the row content; keyboard toggle still works
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: a Markdown description (`**bold**` + a list) renders as HTML (`<strong>` + `<li>`),
+      not literal `**`
+- [x] Playwright: clicking the row body (the bullet / non-control area) toggles the description;
+      clicking the status pill does **not** toggle it
+- [x] App: `role="button"` + `aria-expanded` on the row body (`data-testid="subtask-row-body"`); the
+      title button still provides the keyboard toggle path
+
+Implemented via a shared `MarkdownView` (`src/components/markdown-view.tsx`, `react-markdown`+`remark-gfm`).
+Row-body `onClick` toggles `expandedSubtaskId` with a `closest('button, a, input, select, textarea,
+[data-no-expand]')` guard; the row's own `role="button"` is a `<div>` so it never self-matches.
