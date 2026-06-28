@@ -122,10 +122,11 @@ test.describe("R7.2 — confirm microinteractions", () => {
     expect(cancelHasSvg).toBeGreaterThan(0);
     const confirmText = (await confirmBtn.textContent())?.trim() ?? "";
     expect(confirmText).not.toContain("✓");
-    // Confirm icon should be green (#588157 → rgb(88, 129, 87)) like the row edit panel
+    // The status pill uses InlineConfirm tone="onColor" (R9.9), so the ✓ is WHITE —
+    // legible on the solid status-colored pill (incl. the green COMPLETE pill).
     const confirmColor = await confirmBtn.evaluate((el) => window.getComputedStyle(el).color);
     console.log("  Confirm icon color:", confirmColor);
-    expect(confirmColor).toBe("rgb(88, 129, 87)");
+    expect(confirmColor).toBe("rgb(255, 255, 255)");
 
     // status-pill (idle button) removed
     await expect(pillBtn).toHaveCount(0);
