@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
+import { E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -21,7 +22,7 @@ async function shot(page: Page, name: string) {
 
 async function createProject(page: Page, name: string) {
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', name);
+  await page.fill('input[name="name"]', E2E_MARKER + name);
   await page.fill('input[name="semester"]', "Test 2026");
   await page.getByRole("button", { name: "Create Project" }).click();
   await page.waitForURL(

@@ -1,5 +1,12 @@
 import { expect, type Page } from "@playwright/test";
 
+/**
+ * Marker prepended to every e2e project name. The Playwright globalTeardown deletes
+ * all projects whose name starts with it, so test data never piles up — and it can
+ * never touch the user's real (unmarked) projects.
+ */
+export const E2E_MARKER = "[e2e] ";
+
 export async function login(page: Page) {
   await page.goto("/dev-login");
   await page.fill("#netId", "jav273");
@@ -9,7 +16,7 @@ export async function login(page: Page) {
 
 export async function createProject(page: Page, name: string, semester = "Test 2026"): Promise<string> {
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', name);
+  await page.fill('input[name="name"]', E2E_MARKER + name);
   await page.fill('input[name="semester"]', semester);
   await page.getByRole("button", { name: "Create Project" }).click();
   await page.waitForURL(
@@ -32,10 +39,10 @@ export async function createDeliverable(
   await page.getByRole("button", { name: "Add Deliverable" }).click();
   await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
   await page.waitForLoadState("networkidle");
-  const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
-  await expect(editLink).toBeVisible({ timeout: 10_000 });
-  const id = (await editLink.getAttribute("href"))?.match(/deliverables\/([^/]+)\/edit/)?.[1];
-  if (!id) throw new Error("could not extract deliverable id");
+  const card = page.locator("[data-deliverable-id]", { hasText: title }).first();
+  await expect(card).toBeVisible({ timeout: 10_000 });
+  const id = await card.getAttribute("data-deliverable-id");
+  if (!id) throw new Error("could not read deliverable id");
   return id;
 }
 

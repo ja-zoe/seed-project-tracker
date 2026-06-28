@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
-import { addSubtaskViaModal } from "./helpers";
+import { addSubtaskViaModal, E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -22,7 +22,7 @@ async function shot(page: Page, name: string) {
 
 async function setup(page: Page): Promise<{ projectUrl: string; deliverableId: string }> {
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', `R8.4 ${Date.now()}`);
+  await page.fill('input[name="name"]', E2E_MARKER + `R8.4 ${Date.now()}`);
   await page.fill('input[name="semester"]', "Test 2026");
   await page.getByRole("button", { name: "Create Project" }).click();
   await page.waitForURL(
@@ -39,9 +39,9 @@ async function setup(page: Page): Promise<{ projectUrl: string; deliverableId: s
   await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
   await page.waitForLoadState("networkidle");
 
-  const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
-  await expect(editLink).toBeVisible({ timeout: 10_000 });
-  const deliverableId = (await editLink.getAttribute("href"))?.match(/deliverables\/([^/]+)\/edit/)?.[1];
+  const card = page.locator("[data-deliverable-id]").first();
+  await expect(card).toBeVisible({ timeout: 10_000 });
+  const deliverableId = await card.getAttribute("data-deliverable-id");
   if (!deliverableId) throw new Error("no deliverable id");
 
   await addSubtask(page, projectUrl, deliverableId, "First subtask");

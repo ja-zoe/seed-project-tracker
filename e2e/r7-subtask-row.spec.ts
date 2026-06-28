@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
-import { addSubtaskViaModal } from "./helpers";
+import { addSubtaskViaModal, E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -22,24 +22,9 @@ async function shot(page: Page, name: string) {
 }
 
 async function getProjectWithSubtask(page: Page): Promise<string> {
-  await page.goto("/dashboard");
-  await page.waitForLoadState("networkidle");
-
-  const projectLinks = page.locator('a[href^="/projects/"]').filter({
-    hasNot: page.locator('[href="/projects/new"]'),
-  });
-  if ((await projectLinks.count()) > 0) {
-    const href = await projectLinks.first().getAttribute("href");
-    if (href) {
-      await page.goto(href);
-      await page.waitForLoadState("networkidle");
-      if ((await page.locator('[data-testid="subtask-row"]').count()) > 0) return href;
-    }
-  }
-
-  // Create one
+  // Always create fresh (marker-tagged) so tests never mutate real projects.
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', "R7 Test Project");
+  await page.fill('input[name="name"]', E2E_MARKER + `R7 Test Project ${Date.now()}`);
   await page.fill('input[name="semester"]', "Test 2026");
   await page.getByRole("button", { name: "Create Project" }).click();
   await page.waitForURL(
@@ -56,8 +41,8 @@ async function getProjectWithSubtask(page: Page): Promise<string> {
   await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
   await page.waitForLoadState("networkidle");
 
-  const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
-  await expect(editLink).toBeVisible({ timeout: 10_000 });
+  const card = page.locator("[data-deliverable-id]").first();
+  await expect(card).toBeVisible({ timeout: 10_000 });
 
   // Subtask via the modal (the /subtasks/new page was removed in set 8)
   await page.goto(projectUrl);

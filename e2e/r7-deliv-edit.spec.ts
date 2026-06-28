@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
+import { E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -21,24 +22,9 @@ async function shot(page: Page, name: string) {
 }
 
 async function getProjectWithDeliverable(page: Page): Promise<string> {
-  await page.goto("/dashboard");
-  await page.waitForLoadState("networkidle");
-  const links = page.locator('a[href^="/projects/"]').filter({
-    hasNot: page.locator('[href="/projects/new"]'),
-  });
-  for (let i = 0; i < (await links.count()); i++) {
-    const href = await links.nth(i).getAttribute("href");
-    if (!href) continue;
-    await page.goto(href);
-    await page.waitForLoadState("networkidle");
-    // Need a deliverable with canEdit = true (title pencil visible on hover)
-    const header = page.locator('.border.border-border.rounded-xl .bg-card').first();
-    if ((await header.count()) > 0) return href;
-  }
-
-  // Create one
+  // Always create a fresh (marker-tagged) project so tests never mutate real projects.
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', "R7.4 Edit Project");
+  await page.fill('input[name="name"]', E2E_MARKER + `R7.4 Edit Project ${Date.now()}`);
   await page.fill('input[name="semester"]', "Test 2026");
   await page.getByRole("button", { name: "Create Project" }).click();
   await page.waitForURL(
@@ -174,7 +160,7 @@ test.describe("R7.4 — inline deliverable editing", () => {
     await targetInput.fill("2026-11-30");
     await shot(page, "r7-deliv-dates-filled");
 
-    const confirmBtn = header.locator('button[title="Confirm"]').first();
+    const confirmBtn = header.locator('[data-testid="deliv-dates-edit"] button[title="Confirm"]');
     await confirmBtn.click();
     await page.waitForTimeout(200);
 
@@ -193,7 +179,7 @@ test.describe("R7.4 — inline deliverable editing", () => {
     const targetInput2 = header.locator('[data-testid="deliv-target-input"]').first();
     await startInput2.fill("2027-01-01");
     await targetInput2.fill("2026-01-01");
-    const confirmBtn2 = header.locator('button[title="Confirm"]').first();
+    const confirmBtn2 = header.locator('[data-testid="deliv-dates-edit"] button[title="Confirm"]');
     await confirmBtn2.click();
     await page.waitForTimeout(200);
     await shot(page, "r7-deliv-dates-error");

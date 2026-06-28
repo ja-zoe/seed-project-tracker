@@ -1,6 +1,6 @@
 # R9.1 — Deliverable edit modal
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/deliverable-modal.tsx` (new)
 - `src/components/sortable-deliverables.tsx` (wire the trigger)
@@ -37,14 +37,18 @@ wants it to be a **modal**, mirroring the R8.1 subtask modal (which replaced `/s
 No new DB changes here (priority's column is R9.5).
 
 ## Tests
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: the deliverable "Edit" opens a modal (not a navigation); changing title + dates +
-      description + priority (+ group) and saving persists them without a full page load
-- [ ] App: a deliverable **with** subtasks shows status as locked/derived (not editable) in the modal;
-      one **without** subtasks can set status
-- [ ] App: `startDate > targetDate` rejected; empty title rejected
-- [ ] Build: if Q3 = convert, the `/deliverables/[did]/edit` route is gone and nothing links to it
-- [ ] App: inline deliverable edits (R7.4 + R9.x) still work alongside the modal (regression)
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: "Edit" opens a modal (URL stays on the project page); changing title, priority, group,
+      status, and description persists them without a navigation
+- [x] App (decision Q3): **edit-only** modal — the deliverable CREATE page stays; deliverable status in
+      the modal is read-only/derived when it has subtasks, editable otherwise
+- [x] App: empty title rejected ("Title is required"); `startDate > targetDate` guarded (client + server)
+- [x] Build: `/deliverables/[did]/edit` route is gone (404) and nothing links to it
+- [x] App: inline deliverable edits (R7.4 title/dates, R9.2–R9.5) still work alongside the modal
+
+Q3 resolved: convert **edit only** (user said "edit screen"); the create page is unchanged.
 
 ## Notes / log
 - 2026-06-28 — Specced. No code written.
+
+- 2026-06-28 — Implemented & Playwright-verified. `DeliverableModal` (Dialog) replaces the edit page; `updateDeliverable` made redirect-free + accepts priority. e2e helpers now read `data-deliverable-id` off the card (edit link removed). Branch: `feat/set9/R9.1-deliv-modal`.

@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
-import { addSubtaskViaModal } from "./helpers";
+import { addSubtaskViaModal, E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -23,7 +23,7 @@ async function shot(page: Page, name: string) {
 // Fresh project + deliverable + 2 subtasks + 1 assigned member (so the picker has a member to pick).
 async function setupProject(page: Page): Promise<{ projectUrl: string; memberLabel: string }> {
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', `R7.1r2 ${Date.now()}`);
+  await page.fill('input[name="name"]', E2E_MARKER + `R7.1r2 ${Date.now()}`);
   await page.fill('input[name="semester"]', "Test 2026");
   await page.getByRole("button", { name: "Create Project" }).click();
   await page.waitForURL(
@@ -52,8 +52,8 @@ async function setupProject(page: Page): Promise<{ projectUrl: string; memberLab
   await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
   await page.waitForLoadState("networkidle");
 
-  const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
-  await expect(editLink).toBeVisible({ timeout: 10_000 });
+  const card = page.locator("[data-deliverable-id]").first();
+  await expect(card).toBeVisible({ timeout: 10_000 });
 
   // Two subtasks via the modal (the /subtasks/new page was removed in set 8)
   await page.goto(projectUrl);

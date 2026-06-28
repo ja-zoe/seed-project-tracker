@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
-import { addSubtaskViaModal } from "./helpers";
+import { addSubtaskViaModal, E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -22,24 +22,10 @@ async function shot(page: Page, name: string) {
 }
 
 async function getProjectWithSubtask(page: Page): Promise<string> {
-  await page.goto("/dashboard");
-  await page.waitForLoadState("networkidle");
-  const links = page.locator('a[href^="/projects/"]').filter({
-    hasNot: page.locator('[href="/projects/new"]'),
-  });
-  if ((await links.count()) > 0) {
-    const href = await links.first().getAttribute("href");
-    if (href) {
-      await page.goto(href);
-      await page.waitForLoadState("networkidle");
-      if ((await page.locator('[data-testid="subtask-row"]').count()) > 0) return href;
-    }
-  }
-
-  // Create test data
+  // Always create fresh (marker-tagged) so tests never mutate real projects.
   console.log("  Creating test project + deliverable + subtask…");
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', "R7.2 Test Project");
+  await page.fill('input[name="name"]', E2E_MARKER + `R7.2 Test Project ${Date.now()}`);
   await page.fill('input[name="semester"]', "Test 2026");
   await page.getByRole("button", { name: "Create Project" }).click();
   await page.waitForURL(
@@ -56,8 +42,8 @@ async function getProjectWithSubtask(page: Page): Promise<string> {
   await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
   await page.waitForLoadState("networkidle");
 
-  const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
-  await expect(editLink).toBeVisible({ timeout: 10_000 });
+  const card = page.locator("[data-deliverable-id]").first();
+  await expect(card).toBeVisible({ timeout: 10_000 });
 
   // Subtask via the modal (the /subtasks/new page was removed in set 8)
   await page.goto(projectUrl);
@@ -136,10 +122,11 @@ test.describe("R7.2 — confirm microinteractions", () => {
     expect(cancelHasSvg).toBeGreaterThan(0);
     const confirmText = (await confirmBtn.textContent())?.trim() ?? "";
     expect(confirmText).not.toContain("✓");
-    // Confirm icon should be green (#588157 → rgb(88, 129, 87)) like the row edit panel
+    // The status pill uses InlineConfirm tone="onColor" (R9.9), so the ✓ is WHITE —
+    // legible on the solid status-colored pill (incl. the green COMPLETE pill).
     const confirmColor = await confirmBtn.evaluate((el) => window.getComputedStyle(el).color);
     console.log("  Confirm icon color:", confirmColor);
-    expect(confirmColor).toBe("rgb(88, 129, 87)");
+    expect(confirmColor).toBe("rgb(255, 255, 255)");
 
     // status-pill (idle button) removed
     await expect(pillBtn).toHaveCount(0);

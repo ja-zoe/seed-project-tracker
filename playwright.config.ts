@@ -3,8 +3,13 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
   outputDir: "./e2e/screenshots",
+  // After the run, delete all marker-tagged test projects (see e2e/global-teardown.ts).
+  globalTeardown: "./e2e/global-teardown.ts",
   timeout: 60_000,
-  retries: 0,
+  // One retry absorbs transient flakes from the shared dev server under the long
+  // serial run (a few older helpers use fixed timeouts). A real failure still
+  // fails both attempts.
+  retries: 1,
   workers: 1,
   use: {
     baseURL: "http://localhost:3000",

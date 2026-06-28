@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
-import { addSubtaskViaModal } from "./helpers";
+import { addSubtaskViaModal, E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -23,33 +23,12 @@ async function shot(page: Page, name: string) {
 // ─── Test setup: create a project with a deliverable + subtask ───────────────
 
 async function ensureTestProject(page: Page): Promise<string> {
-  // Check dashboard for existing projects (exclude /new and /active etc.)
-  await page.goto("/dashboard");
-  await page.waitForLoadState("networkidle");
-
-  // Look for links with /projects/<uuid-like> path (skip /projects/new)
-  const projectLinks = page.locator('a[href^="/projects/"]').filter({
-    hasNot: page.locator('[href="/projects/new"]'),
-  });
-
-  const count = await projectLinks.count();
-  if (count > 0) {
-    const href = await projectLinks.first().getAttribute("href");
-    if (href && !href.includes("/new")) {
-      // Check if it has subtasks
-      await page.goto(href!);
-      await page.waitForLoadState("networkidle");
-      const subtasks = page.locator('[data-testid="subtask-row"]');
-      if ((await subtasks.count()) > 0) return href!;
-    }
-  }
-
-  // No usable project/subtask found — create test data via forms
+  // Always create fresh (marker-tagged) so tests never mutate real projects.
   console.log("  Creating test project + deliverable + subtask…");
 
   // 1. Create project
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', "Playwright Test Project");
+  await page.fill('input[name="name"]', E2E_MARKER + `Playwright Test Project ${Date.now()}`);
   await page.fill('input[name="semester"]', "Test 2026");
   await page.getByRole("button", { name: "Create Project" }).click();
   // Wait until the URL changes away from /projects/new to an actual project page
@@ -72,17 +51,11 @@ async function ensureTestProject(page: Page): Promise<string> {
   );
   await page.waitForLoadState("networkidle");
 
-  // Get deliverable id from the page
-  const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
-  await expect(editLink).toBeVisible({ timeout: 10_000 });
-  const editHref = await editLink.getAttribute("href");
-  const deliverableId = editHref?.match(/deliverables\/([^/]+)\/edit/)?.[1];
-  console.log("  Deliverable ID:", deliverableId);
-
-  if (!deliverableId) throw new Error("Could not extract deliverable ID");
+  // Confirm the deliverable rendered
+  const card = page.locator("[data-deliverable-id]").first();
+  await expect(card).toBeVisible({ timeout: 10_000 });
 
   // 3. Create subtask via the modal (the /subtasks/new page was removed in set 8)
-  void deliverableId;
   await page.goto(projectUrl);
   await page.waitForLoadState("networkidle");
   await addSubtaskViaModal(page, "Test Subtask");
