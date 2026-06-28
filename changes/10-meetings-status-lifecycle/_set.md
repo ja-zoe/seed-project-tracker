@@ -3,10 +3,11 @@
 Bootstrap: read `changes/CONTEXT.md` first for project invariants.
 This file is the index and roll-up log for set 10.
 
-> **OUTLINE ONLY (2026-06-28).** Per the user's instruction, the per-feature `R10.*` specs are written
-> in the *next* phase (after the user confirms the Set 9 updates + this categorization). This file
-> currently captures the theme, the feature breakdown, and the open design questions to resolve when
-> the specs are fleshed out.
+> **Specs written 2026-06-28** (phase 2, after the user confirmed the Set 9 updates + split). The
+> per-feature `R10.1`–`R10.3` specs are in the sibling directories, using the user's confirmed defaults
+> (Eboard = new role + permission; status update links to a per-project lead meeting). Remaining
+> design choices are listed as Open questions below and inside each spec — **no code written yet;
+> awaiting the user's review before implementation.**
 
 This set ties **status updates** to **lead meetings** on the calendar, adds **lead** and **eboard**
 meeting types with role-based visibility, makes the status-submit window configurable, governs the
@@ -60,5 +61,7 @@ meeting types with role-based visibility, makes the status-submit window configu
 - Possibly a new `Permission` value(s) + an "Eboard" role (Q1). Apply all via `scripts/apply-schema.ts`.
 
 ## Log
-- 2026-06-28 — Set 10 outlined (theme + features + open questions). Per-feature specs to be written in
-  the next phase, after the user confirms the Set 9 updates and this split.
+- 2026-06-28 — Set 10 outlined (theme + features + open questions).
+- 2026-06-28 — R10.1–R10.3 specs written with the user's confirmed defaults. No code yet; gated on the
+  user's review (esp. the DB changes: `CalendarEventType` values, `Settings.statusSubmitWindowDays`,
+  `Permission.VIEW_LEAD_MEETINGS`, an Eboard role, and `StatusUpdate.calendarEventId`).
