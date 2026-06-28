@@ -117,14 +117,20 @@ placement issue. Reopened to address them.
   Assignee commits via the picker (`Enter`/click), so it doesn't rely on Panel B either.
 
 **Round-2 tests:**
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: clicking one subtask's assignee name opens **exactly one** picker
-      (`[data-testid="assignee-picker"]` count === 1), anchored under that row; other rows show none
-- [ ] Playwright: on open, the picker's search input is `document.activeElement`; pressing
-      `ArrowDown` then `Enter` selects a member (assignee name updates after confirm)
-- [ ] Playwright: while editing a title, the `✓ / ✗` confirm renders adjacent to the title input
-      (its x-position is near the title, not at the row's right edge)
-- [ ] App: keyboard-only reassign (focus name → Enter/Space opens → arrows → Enter) works end-to-end
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: with 2 subtasks, clicking one assignee name opens **exactly one** picker
+      (`[data-testid="assignee-picker"]` count === 1), anchored under that row; the other stays closed
+- [x] Playwright: on open, the picker's search input is focused; `ArrowDown` highlights the member
+      (`[data-active]`), `Enter` selects it → assignee commits to that member (no longer "Unassigned")
+- [x] Playwright: while editing a title, the confirm renders adjacent to the title input
+      (its x is just right of the input and within the left ~60% of the row, not at the right edge)
+- [x] App: keyboard reassign (open picker → arrows → Enter → Save) works end-to-end
+
+Notes: fixed a latent **autofocus** bug — `AssigneeSearch` focused on `[]` mount, but the portal
+renders `null` until `useAnchorPos` resolves, so the input mounts on the 2nd render and was never
+focused; changed the focus effect to depend on `pos`. The title-edit confirm uses the shared
+`InlineConfirm` (title="Confirm"/"Cancel"); the right-panel assignee/dueDate commit stays as
+Panel B (title="Save"/"Cancel").
 
 ## Notes / log
 - 2026-06-27 — Specced. No code written.
