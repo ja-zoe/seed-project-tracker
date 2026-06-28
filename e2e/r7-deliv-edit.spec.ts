@@ -174,7 +174,7 @@ test.describe("R7.4 — inline deliverable editing", () => {
     await targetInput.fill("2026-11-30");
     await shot(page, "r7-deliv-dates-filled");
 
-    const confirmBtn = header.locator('button[title="Confirm"]').first();
+    const confirmBtn = header.locator('[data-testid="deliv-dates-edit"] button[title="Confirm"]');
     await confirmBtn.click();
     await page.waitForTimeout(200);
 
@@ -193,7 +193,7 @@ test.describe("R7.4 — inline deliverable editing", () => {
     const targetInput2 = header.locator('[data-testid="deliv-target-input"]').first();
     await startInput2.fill("2027-01-01");
     await targetInput2.fill("2026-01-01");
-    const confirmBtn2 = header.locator('button[title="Confirm"]').first();
+    const confirmBtn2 = header.locator('[data-testid="deliv-dates-edit"] button[title="Confirm"]');
     await confirmBtn2.click();
     await page.waitForTimeout(200);
     await shot(page, "r7-deliv-dates-error");
