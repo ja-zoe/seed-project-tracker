@@ -137,8 +137,9 @@ not DB columns / code identifiers):
   `status-updates.ts` identifiers as-is — internal names.)
 
 **Round-3 tests:**
-- [ ] Playwright: a global LEAD_MEETING (created with no project, in the project's semester, inside the
+- [x] Playwright: a global LEAD_MEETING (created with no project, in the project's semester, inside the
       window) makes the Submit button appear on the dashboard AND the project page; outside the window
-      → hidden; after submitting → hidden
-- [ ] App: the project-page button reads "Submit Project Standing"; the bottom link reads "Project
-      Standing History"; the dashboard CTA + status/new page + edit modal use the new naming
+      → hidden; after submitting → hidden (`r10-submit-gating`, `r10-status-lifecycle`)
+- [x] App: renamed throughout — button "Submit Project Standing", bottom link "Project Standing
+      History", section "Recent Project Standings", dashboard CTA, status/new page, edit modal
+- [x] Full e2e suite green (33 passed; lead meetings now isolated per-semester in tests)
