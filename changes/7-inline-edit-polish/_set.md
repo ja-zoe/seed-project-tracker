@@ -11,10 +11,10 @@ and extending inline editing to deliverable fields. All features touch
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [t] R7.1 — Subtask row polish — bullet/padding/click-name-to-reassign **[round 2 done: picker scoped+autofocus+keyboard, title confirm next to title]**
-- [t] R7.2 — Confirm microinteractions — animated transitions + shared `InlineConfirm` **[round 2 done: CheckFat/XCircle icons]**
-- [t] R7.3 — Deliverable lock tooltip — shadcn Tooltip **[round 2 done: dropped cursor-help]**
-- [t] R7.4 — Inline deliverable editing — edit deliverable title, start date, and end date (`targetDate`) inline using the R7.2 microinteraction
+- [x] R7.1 — Subtask row polish — bullet/padding/click-name-to-reassign **[round 2 done: picker scoped+autofocus+keyboard, title confirm next to title]**
+- [x] R7.2 — Confirm microinteractions — animated transitions + shared `InlineConfirm` **[round 2 done: CheckFat/XCircle icons]**
+- [x] R7.3 — Deliverable lock tooltip — shadcn Tooltip **[round 2 done: dropped cursor-help]**
+- [x] R7.4 — Inline deliverable editing — edit deliverable title, start date, and end date (`targetDate`) inline using the R7.2 microinteraction
 
 ## Sequencing & file overlap
 All four features edit `src/components/sortable-deliverables.tsx`, so they are developed
@@ -51,3 +51,4 @@ not violate the Lucide ban — verify the generated file imports none.
 - 2026-06-27 — User review (the set→main gate) reopened R7.1/R7.2/R7.3 with round-2 feedback
   (`[~]`); each feature file has a "Review feedback — round 2" section. R7.4 unchanged. Set
   stays open; new/unrelated work moved to Set 8.
+- 2026-06-28 — Set 7 merged to `main` (stacked with sets 6 & 8). All features `[x]`.

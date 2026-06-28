@@ -8,7 +8,7 @@ This file is the index and roll-up log for set 6. Per-feature specs live in the 
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
 - [~] R6.1 — Signup email — email + in-app alert to all MANAGE_USERS holders when a new user signs up
 - [~] R6.2 — Project CRUD — edit page + delete action (app); `create_project`/`update_project` MCP tools, MANAGE_PROJECTS-gated
-- [t] R6.3 — Inline subtask editing + deliverable lock — full inline editing (status, title, assignee, due date) with slide-in confirm; deliverable status derived from subtasks + locked in UI
+- [x] R6.3 — Inline subtask editing + deliverable lock — full inline editing (status, title, assignee, due date) with slide-in confirm; deliverable status derived from subtasks + locked in UI
 - [~] R6.4 — Project dates — add `startDate`/`endDate` to Project; show duration; end blank ⇒ "Present"
 - [~] R6.5 — Timeline fix — remove visual artifacts in the deliverable Gantt (misaligned today line, null-start bars, single-date range)
 - [~] R6.6 — Semester Calendar — new `/calendar` view of project + non-project meetings, editable by MANAGE_CALENDAR holders
@@ -41,3 +41,4 @@ then **restart the dev server** (Turbopack caches the old WASM bundle).
 - 2026-06-27 — Set 6 created; R6.1–R6.6 specced.
 - 2026-06-27 — All 6 features implemented and merged to feat/set6-projects-calendar. pnpm build passes clean. Awaiting user verification + approval to merge to main.
 - 2026-06-27 — Status markers reverted [t]→[~]: build-only gate was treated as full test pass — manual test items were never run. Bugs also found post-merge: (1) deliverable status not cascading when subtask status changed; (2) RESEND_FROM env var mismatch (should be EMAIL_FROM); (3) inline subtask title editing missing. Fixed all three. Re-verification required.
+- 2026-06-28 — Set 6 merged to `main` (stacked with sets 7 & 8). All features `[x]`.

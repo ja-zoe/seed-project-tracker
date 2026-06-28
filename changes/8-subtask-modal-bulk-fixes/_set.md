@@ -12,12 +12,12 @@ plus a new bulk project-delete for PMs).
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [t] R8.1 — Subtask modal **[round 2 done: modal description Markdown/plain]**
-- [t] R8.2 — Expandable subtask description **[round 2 done: Markdown render + click-anywhere-on-row]**
-- [t] R8.3 — Subtask due-date bounds & year — bound a subtask's due date by the deliverable's start/target dates; show the year in due-date labels when it isn't the current year
-- [t] R8.4 — Deliverable status re-derivation (bug) — adding/deleting a subtask must recompute the parent deliverable's derived status, not just status edits
-- [t] R8.5 — Bulk project delete — `MANAGE_PROJECTS` users can multi-select projects in the list and delete them together
-- [t] R8.6 — Status-update Prisma null constraint (bug) **[round 2 done: submit loading state]**
+- [x] R8.1 — Subtask modal **[round 2 done: modal description Markdown/plain]**
+- [x] R8.2 — Expandable subtask description **[round 2 done: Markdown render + click-anywhere-on-row]**
+- [x] R8.3 — Subtask due-date bounds & year — bound a subtask's due date by the deliverable's start/target dates; show the year in due-date labels when it isn't the current year
+- [x] R8.4 — Deliverable status re-derivation (bug) — adding/deleting a subtask must recompute the parent deliverable's derived status, not just status edits
+- [x] R8.5 — Bulk project delete — `MANAGE_PROJECTS` users can multi-select projects in the list and delete them together
+- [x] R8.6 — Status-update Prisma null constraint (bug) **[round 2 done: submit loading state]**
 
 ## Sequencing & file overlap
 - **R8.1, R8.2, R8.3, R8.4** all touch the subtask surface (`src/components/sortable-deliverables.tsx`
@@ -79,3 +79,4 @@ the generated file imports no `lucide-react` (Lucide is banned — see `CONTEXT.
   modal), R8.6-r2 (`SubmitButton` loading state). All R8.* back to `[t]`. Full e2e suite (19 tests)
   green; `pnpm build` clean. **Awaiting the user's validation of Set 8 before merging to `main`**
   (order 6 → 7 → 8), and before building Set 9.
+- 2026-06-28 — Set 8 merged to `main` (stack 6→7→8). All features `[x]`.
