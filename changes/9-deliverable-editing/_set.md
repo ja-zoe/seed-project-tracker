@@ -66,3 +66,9 @@ No other DB changes (`description`, `group`, `orderIndex` already exist).
 ## Log
 - 2026-06-28 — Set 9 scaffolded; R9.1–R9.6 specced. No code written. Gated on the user verifying Set 8
   (incl. its round-2 changes) is done before building Set 9.
+- 2026-06-28 — All R9.1–R9.6 implemented, Playwright-verified, and merged into the set branch
+  (`feat/set9-deliverable-editing`, off `main`). DB: `Priority` enum + `Deliverable.priority` applied.
+  Full e2e suite green (25 tests; `retries:1` absorbs transient shared-dev-server flakes); `pnpm build`
+  clean. Decisions: priority enum LOW/MEDIUM/HIGH; deliverable EDIT→modal (create page kept); up/down
+  reorder within a priority tier. **Awaiting the user's validation before merging to `main`** (6→7→8 are
+  already in main; this would be set 9).
