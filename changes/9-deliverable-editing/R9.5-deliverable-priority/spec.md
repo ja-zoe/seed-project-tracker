@@ -1,6 +1,6 @@
 # R9.5 — Deliverable priority (inline + modal)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `prisma/schema.prisma` (+ DDL via `scripts/apply-schema.ts`) — **DB change**
 - `src/lib/actions/deliverables.ts` (`updateDeliverablePriority`; include priority in create/update)
@@ -39,12 +39,17 @@ Sort weight: `HIGH > MEDIUM > LOW` (highest on top).
   interface.
 
 ## Tests
-- [ ] DDL applied; `priority` column exists with default `MEDIUM`; `prisma generate` + dev restart done
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: a deliverable shows a priority chip; changing it inline (LOW→HIGH) persists after
-      revalidation
-- [ ] App: priority is settable in the edit modal (R9.1) and on create
-- [ ] App: existing deliverables backfill to `MEDIUM`
+- [x] DDL applied (`Priority` enum + `Deliverable.priority` NOT NULL default MEDIUM); `prisma generate`
+      + dev-server restart done (Turbopack WASM cache)
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: a deliverable shows a "Med" chip (default); changing it inline (Med→High) persists
+      through a reload
+- [~] App: priority in the edit modal + on create — deferred to R9.1 (the modal); create defaults to MEDIUM
+- [x] App: existing deliverables backfill to `MEDIUM` (column default)
+
+DECISION (user-confirmed): `Priority` enum LOW/MEDIUM/HIGH, default MEDIUM, sort HIGH→LOW.
 
 ## Notes / log
 - 2026-06-28 — Specced. No code written. DB SQL rolled into `_set.md` "DB changes in this set".
+
+- 2026-06-28 — Implemented & Playwright-verified. Enum `Priority` (LOW/MEDIUM/HIGH) added; column via fix.sql; `PriorityMenu` + inline chip; `updateDeliverablePriority`. Branch: `feat/set9/R9.5-priority`.
