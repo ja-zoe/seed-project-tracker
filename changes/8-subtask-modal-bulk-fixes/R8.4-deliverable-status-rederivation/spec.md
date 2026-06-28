@@ -1,6 +1,6 @@
 # R8.4 — Deliverable status re-derivation on subtask add/delete (bug)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/lib/actions/deliverables.ts`
 
@@ -42,15 +42,19 @@ No DB changes; no new columns — pure server-action refactor + added call sites
 
 ## Tests
 
-- [ ] `pnpm build` / typecheck passes
-- [ ] App (the reported repro): create a deliverable + subtasks, complete **all** → deliverable shows
-      `COMPLETE`; **add a new subtask** → deliverable immediately re-derives **off** `COMPLETE`
-      (to `NOT_STARTED`/`IN_PROGRESS`) **without** touching any existing subtask
-- [ ] App: delete a subtask such that the remaining set's derived status changes (e.g. remove the only
-      `BLOCKED` subtask) → deliverable updates immediately
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright (the reported repro): complete the only subtask → deliverable `Complete`; **add a new
+      subtask** → deliverable immediately re-derives to `In Progress` (one COMPLETE + one NOT_STARTED)
+      without touching the existing subtask
+- [x] Playwright: delete a subtask → deliverable re-derives (delete path runs the helper; no stale/error)
+- [x] App: existing status-edit path still derives correctly (regression — covered by R7.2 + R8.4 tests)
 - [ ] App: delete the **last** subtask → deliverable becomes manually-editable again per the empty-set
-      rule (Q4)
-- [ ] App: existing status-edit path still derives correctly (regression)
+      rule (Q4) — covered by code (empty-set branch clears `completed`, leaves status); not asserted in UI
 
 ## Notes / log
 - 2026-06-27 — Specced. No code written.
+- 2026-06-27 — Implemented. Extracted `deriveDeliverableStatus(deliverableId)` (exported) and called
+  it from `createSubtask`, `deleteSubtask`, `updateSubtask`, and `updateSubtaskStatus` (replacing the
+  inline block). Empty-set branch clears completion + leaves status. Preserves the original
+  `completedDate` when already complete (avoids resetting it on every re-derive). Playwright repro
+  passes. Branch: `feat/set8/R8.4-status-rederivation`.

@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
+import { addSubtaskViaModal } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -59,16 +60,11 @@ async function getProjectWithLockedDeliverable(page: Page): Promise<string> {
 
   const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
   await expect(editLink).toBeVisible({ timeout: 10_000 });
-  const editHref = await editLink.getAttribute("href");
-  const deliverableId = editHref?.match(/deliverables\/([^/]+)\/edit/)?.[1];
-  if (!deliverableId) throw new Error("Could not extract deliverable ID");
 
-  await page.goto(`${projectUrl}/deliverables/${deliverableId}/subtasks/new`);
+  // Subtask via the modal (locks the deliverable status) — /subtasks/new removed in set 8
+  await page.goto(projectUrl);
   await page.waitForLoadState("networkidle");
-  await page.fill('input[name="title"]', "Lock Subtask");
-  await page.getByRole("button", { name: "Add Subtask" }).click();
-  await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
-  await page.waitForLoadState("networkidle");
+  await addSubtaskViaModal(page, "Lock Subtask");
 
   return projectUrl;
 }

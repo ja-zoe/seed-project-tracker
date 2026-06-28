@@ -12,12 +12,12 @@ plus a new bulk project-delete for PMs).
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [ ] R8.1 — Subtask modal — move subtask **creation** from a separate page into a modal, and offer the same modal to edit the whole subtask at once (title/description/assignee/due date/status); inline edits stay
-- [ ] R8.2 — Expandable subtask description — clicking a subtask row expands it to show its description, pushing siblings down
-- [ ] R8.3 — Subtask due-date bounds & year — bound a subtask's due date by the deliverable's start/target dates; show the year in due-date labels when it isn't the current year
-- [ ] R8.4 — Deliverable status re-derivation (bug) — adding/deleting a subtask must recompute the parent deliverable's derived status, not just status edits
-- [ ] R8.5 — Bulk project delete — `MANAGE_PROJECTS` users can multi-select projects in the list and delete them together
-- [ ] R8.6 — Status-update Prisma null constraint (bug) — `prisma.statusUpdate.create()` throws a null-constraint error on submit; diagnose the live-table drift and fix
+- [t] R8.1 — Subtask modal **[round 2 done: modal description Markdown/plain]**
+- [t] R8.2 — Expandable subtask description **[round 2 done: Markdown render + click-anywhere-on-row]**
+- [t] R8.3 — Subtask due-date bounds & year — bound a subtask's due date by the deliverable's start/target dates; show the year in due-date labels when it isn't the current year
+- [t] R8.4 — Deliverable status re-derivation (bug) — adding/deleting a subtask must recompute the parent deliverable's derived status, not just status edits
+- [t] R8.5 — Bulk project delete — `MANAGE_PROJECTS` users can multi-select projects in the list and delete them together
+- [t] R8.6 — Status-update Prisma null constraint (bug) **[round 2 done: submit loading state]**
 
 ## Sequencing & file overlap
 - **R8.1, R8.2, R8.3, R8.4** all touch the subtask surface (`src/components/sortable-deliverables.tsx`
@@ -51,15 +51,31 @@ plus a new bulk project-delete for PMs).
    navigable when not selecting. Confirm (alternative: always-visible checkboxes).
 
 ## DB changes in this set
-**None planned.** All affected columns already exist (`Subtask.description/dueDate`,
-`Deliverable.startDate/targetDate`). **Exception — R8.6:** the status-update null-constraint bug is
-likely live-table drift (this project applies raw DDL via `scripts/apply-schema.ts`); if diagnosis
-finds a NOT-NULL column missing a default in the `StatusUpdate` table, the fix may be a small DDL
-patch applied via `scripts/apply-schema.ts`. Finalize after R8.6 step 1 (introspection) and roll the
-exact SQL up here.
+**R8.6 (applied):** the `StatusUpdate.updatedAt` column was NOT NULL with no default and absent from
+the Prisma model, so every insert violated the constraint. Patched via `scripts/apply-schema.ts`:
+
+```sql
+ALTER TABLE "StatusUpdate" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
+```
+
+(Also saved at `R8.6-status-update-null-constraint/fix.sql`.) No other DB changes — the rest of the
+set's affected columns already exist (`Subtask.description/dueDate`, `Deliverable.startDate/targetDate`).
 
 Non-DB setup: R8.1 adds the shadcn **Dialog** component (`pnpm dlx shadcn@latest add dialog`). Verify
 the generated file imports no `lucide-react` (Lucide is banned — see `CONTEXT.md`).
 
 ## Log
 - 2026-06-27 — Set 8 scaffolded; R8.1–R8.6 specced. No code written.
+- 2026-06-27 — All R8.1–R8.6 implemented, Playwright-verified, and merged into the set branch
+  (`feat/set8-subtask-modal-bulk-fixes`). Full e2e suite (16 tests) green; `pnpm build` clean.
+  Awaiting the user's final review before merging to `main` (order: set 6 → set 7 → set 8).
+- 2026-06-28 — User review reopened R8.1/R8.2/R8.6 with round-2 feedback (`[~]`): subtask description
+  Markdown/plain (R8.1 editor + R8.2 render), click-anywhere-on-row to expand (R8.2), and a
+  status-update submit loading state (R8.6). Specced only — implementation pending the user's go-ahead.
+  New deliverable-editing work moved to Set 9 (scaffolded, not built; gated on the user verifying
+  Set 8 is done first).
+- 2026-06-28 — Round-2 changes implemented & Playwright-verified, each merged into the set branch:
+  R8.2-r2 (shared `MarkdownView`, click-row-to-expand), R8.1-r2 (controllable `MarkdownEditor` in the
+  modal), R8.6-r2 (`SubmitButton` loading state). All R8.* back to `[t]`. Full e2e suite (19 tests)
+  green; `pnpm build` clean. **Awaiting the user's validation of Set 8 before merging to `main`**
+  (order 6 → 7 → 8), and before building Set 9.
