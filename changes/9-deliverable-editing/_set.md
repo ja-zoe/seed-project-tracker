@@ -16,7 +16,7 @@ on `src/components/sortable-deliverables.tsx` + `src/lib/actions/deliverables.ts
 - [t] R9.2 — Deliverable status + delete microinteractions — the inline deliverable **status** edit and the **delete** button use the same animated ✓/✗ `InlineConfirm` (CheckFat/XCircle) as the subtask status pill
 - [t] R9.3 — Inline group combobox — edit a deliverable's group inline via a dropdown of existing groups, with type-to-create-new
 - [t] R9.4 — Deliverable description expand + inline edit — clicking the deliverable body (not a control) shows its description; edit it inline (Markdown or plain) without a modal
-- [ ] R9.5 — Deliverable priority — new editable `priority` field, inline in the header and in the edit modal (**DB change**)
+- [t] R9.5 — Deliverable priority — new editable `priority` field, inline in the header and in the edit modal (**DB change**)
 - [ ] R9.6 — Group filter + within-group ordering — filter deliverables by group; reorder within a group; default sort is by priority (highest at top)
 
 ## Sequencing & file overlap
@@ -54,8 +54,8 @@ on `src/components/sortable-deliverables.tsx` + `src/lib/actions/deliverables.ts
 Pending Q2 (enum vs int). If enum (recommended):
 
 ```sql
--- finalize after Q2
-CREATE TYPE "Priority" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+-- APPLIED 2026-06-28 via scripts/apply-schema.ts (also at R9.5-…/fix.sql)
+CREATE TYPE "Priority" AS ENUM ('LOW', 'MEDIUM', 'HIGH');  -- (idempotent guard in fix.sql)
 ALTER TABLE "Deliverable" ADD COLUMN "priority" "Priority" NOT NULL DEFAULT 'MEDIUM';
 ```
 
