@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
+import { addSubtaskViaModal } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -47,13 +48,11 @@ async function setup(page: Page): Promise<{ projectUrl: string; deliverableId: s
   return { projectUrl, deliverableId };
 }
 
-async function addSubtask(page: Page, projectUrl: string, deliverableId: string, title: string) {
-  await page.goto(`${projectUrl}/deliverables/${deliverableId}/subtasks/new`);
+async function addSubtask(page: Page, projectUrl: string, _deliverableId: string, title: string) {
+  // Via the modal — the /subtasks/new page was removed in set 8.
+  await page.goto(projectUrl);
   await page.waitForLoadState("networkidle");
-  await page.fill('input[name="title"]', title);
-  await page.getByRole("button", { name: "Add Subtask" }).click();
-  await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
-  await page.waitForLoadState("networkidle");
+  await addSubtaskViaModal(page, title);
 }
 
 async function completeSubtask(page: Page, rowIndex: number) {
