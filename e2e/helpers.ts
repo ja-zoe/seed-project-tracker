@@ -1,5 +1,12 @@
 import { expect, type Page } from "@playwright/test";
 
+/**
+ * Marker prepended to every e2e project name. The Playwright globalTeardown deletes
+ * all projects whose name starts with it, so test data never piles up — and it can
+ * never touch the user's real (unmarked) projects.
+ */
+export const E2E_MARKER = "[e2e] ";
+
 export async function login(page: Page) {
   await page.goto("/dev-login");
   await page.fill("#netId", "jav273");
@@ -9,7 +16,7 @@ export async function login(page: Page) {
 
 export async function createProject(page: Page, name: string, semester = "Test 2026"): Promise<string> {
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', name);
+  await page.fill('input[name="name"]', E2E_MARKER + name);
   await page.fill('input[name="semester"]', semester);
   await page.getByRole("button", { name: "Create Project" }).click();
   await page.waitForURL(

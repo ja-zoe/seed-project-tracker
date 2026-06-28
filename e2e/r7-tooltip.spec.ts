@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
-import { addSubtaskViaModal } from "./helpers";
+import { addSubtaskViaModal, E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -22,26 +22,10 @@ async function shot(page: Page, name: string) {
 }
 
 async function getProjectWithLockedDeliverable(page: Page): Promise<string> {
-  await page.goto("/dashboard");
-  await page.waitForLoadState("networkidle");
-  const links = page.locator('a[href^="/projects/"]').filter({
-    hasNot: page.locator('[href="/projects/new"]'),
-  });
-
-  for (let i = 0; i < (await links.count()); i++) {
-    const href = await links.nth(i).getAttribute("href");
-    if (!href) continue;
-    await page.goto(href);
-    await page.waitForLoadState("networkidle");
-    // A locked badge = deliverable with subtasks
-    const locked = page.locator('[data-testid="deliverable-locked-badge"]');
-    if ((await locked.count()) > 0) return href;
-  }
-
-  // No locked deliverable found — create one
+  // Always create fresh (marker-tagged) so tests never mutate real projects.
   console.log("  Creating project with locked deliverable…");
   await page.goto("/projects/new");
-  await page.fill('input[name="name"]', "R7.3 Tooltip Project");
+  await page.fill('input[name="name"]', E2E_MARKER + `R7.3 Tooltip Project ${Date.now()}`);
   await page.fill('input[name="semester"]', "Test 2026");
   await page.getByRole("button", { name: "Create Project" }).click();
   await page.waitForURL(
