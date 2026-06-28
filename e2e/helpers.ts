@@ -46,6 +46,40 @@ export async function createDeliverable(
   return id;
 }
 
+/** Add the dev user (jav273) to a project as a LEAD via the members page. */
+export async function addSelfAsLead(page: Page, projectUrl: string) {
+  await page.goto(`${projectUrl}/members`);
+  await page.waitForLoadState("networkidle");
+  const userSelect = page.locator('select[name="userId"]');
+  const opts = await userSelect.locator("option").evaluateAll((os) =>
+    (os as HTMLOptionElement[]).map((o) => ({ value: o.value, text: o.textContent ?? "" }))
+  );
+  const jav = opts.find((o) => o.text.includes("jav273"));
+  if (!jav) throw new Error("jav273 not in member options");
+  await userSelect.selectOption(jav.value);
+  await page.locator('select[name="role"]').selectOption("LEAD");
+  await page.getByRole("button", { name: "Add to Project" }).click();
+  await page.waitForLoadState("networkidle");
+}
+
+/** Create a LEAD_MEETING calendar event for a project (so status updates can be submitted). */
+export async function createLeadMeeting(page: Page, projectLabel: string, title: string, startsAtLocal: string) {
+  await page.goto("/calendar");
+  await page.waitForLoadState("networkidle");
+  await page.getByRole("button", { name: "Add event" }).first().click();
+  await page.locator('input[name="title"]').fill(title);
+  await page.locator('select[name="type"]').selectOption("LEAD_MEETING");
+  await page.locator('input[name="startsAt"]').fill(startsAtLocal);
+  await page.locator('select[name="projectId"]').selectOption({ label: projectLabel });
+  await page.getByRole("button", { name: "Add Event", exact: true }).click();
+  await page.waitForTimeout(400);
+}
+
+/** A datetime-local string at now + offsetMs (e.g. tomorrow = +86_400_000). */
+export function dtLocal(offsetMs: number): string {
+  return new Date(Date.now() + offsetMs).toISOString().slice(0, 16);
+}
+
 /**
  * Add a subtask via the in-page modal (the /subtasks/new page was removed in set 8).
  * Assumes the project page is already loaded. `deliverableIndex` selects which
