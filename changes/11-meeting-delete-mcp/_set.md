@@ -13,7 +13,7 @@ so lead/eboard meetings aren't leaked through MCP.
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
 - [x] R11.1 — Delete meeting records — new `MANAGE_MEETING_RECORDS` permission; `deleteMeetingRecord`
       server action; delete microinteraction on the project page + standing-history page (**DB change**)
-- [t] R11.2 — MCP capability expansion — add `list_meeting_records`, `create_meeting_record`,
+- [x] R11.2 — MCP capability expansion — add `list_meeting_records`, `create_meeting_record`,
       `delete_meeting_record`, `list_status_updates`; add `LEAD_MEETING`/`EBOARD_MEETING` to the calendar
       tool enums and enforce `VIEW_LEAD_MEETINGS` in `list_calendar_events`
 
