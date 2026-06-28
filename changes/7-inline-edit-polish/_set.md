@@ -12,7 +12,7 @@ and extending inline editing to deliverable fields. All features touch
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
 - [~] R7.1 — Subtask row polish — bullet/padding/click-name-to-reassign **[round 2: scope picker to one row, autofocus + keyboard nav, title confirm next to title]**
-- [~] R7.2 — Confirm microinteractions — animated transitions + shared `InlineConfirm` **[round 2: use CheckFat/XCircle icons like everything else]**
+- [t] R7.2 — Confirm microinteractions — animated transitions + shared `InlineConfirm` **[round 2 done: CheckFat/XCircle icons]**
 - [~] R7.3 — Deliverable lock tooltip — shadcn Tooltip **[round 2: drop cursor-help on the locked badge]**
 - [t] R7.4 — Inline deliverable editing — edit deliverable title, start date, and end date (`targetDate`) inline using the R7.2 microinteraction
 
