@@ -1,6 +1,6 @@
 # R10.2 — Status-update lifecycle (link to lead meeting, edit/delete, late marking)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `prisma/schema.prisma` + DDL (**DB change**: `StatusUpdate.calendarEventId`)
 - `src/lib/actions/status-updates.ts` (submit/edit/delete + window/late logic + permission gating)
@@ -46,13 +46,21 @@ update regardless of due time.
 owner-lead-before-due **OR** privileged. `submitStatusUpdate` sets `calendarEventId` + `isLate`.
 
 ## Tests
-- [ ] DDL applied (`calendarEventId`); `prisma generate` + dev restart; `pnpm build` passes
-- [ ] App: "Submit Update" appears only within the window before a project's lead meeting
-- [ ] App: a lead submits before the meeting → editable/deletable; submits after → saved + flagged
-      **late** and not lead-editable
-- [ ] App: after due, the lead can't edit/delete; a PM/Eboard can edit/delete inline (✓/✗ confirm)
-- [ ] App: deleting the lead meeting nulls the link (no orphan crash)
+- [x] DDL applied (`calendarEventId` FK, `MANAGE_STATUS_UPDATES` — see fix.sql); seed grants it to
+      PM + Eboard; `prisma generate` + dev restart; `pnpm build` passes
+- [x] Playwright: "Submit Update" is hidden until the project has a lead meeting open for submission,
+      then appears and links to that meeting
+- [x] Playwright: an upcoming (in-window) meeting → on-time submission (no Late badge); a past meeting
+      → submission **marked Late**
+- [x] Playwright: a privileged user (PM, MANAGE_STATUS_UPDATES) edits (modal) + deletes (inline ✓/✗
+      confirm) a status update from the project page
+- [~] Lead-only-before-due edit/delete: enforced server-side (`assertCanModifyStatusUpdate`) +
+      gated in UI (`canModifyStatusUpdate` checks own + lead + now<=meeting). Not separately UI-tested
+      (dev-login can't easily make a non-privileged ACTIVE lead distinct from the PM)
+- [x] Deleting the lead meeting nulls the link (FK ON DELETE SET NULL; due then falls back to meetingDate)
 
 ## Notes / log
 - 2026-06-28 — Specced (Set 10, phase 2). No code written. Open: keep vs retire `meetingDate` /
   `submissionDeadlineHours`; exact privileged permission (new `MANAGE_STATUS_UPDATES` vs `MANAGE_PROJECTS`).
+
+- 2026-06-28 — Implemented & Playwright-verified. `getActiveLeadMeeting` (lib); submit links the meeting + derives meetingDate + isLate(now>startsAt); button gated on an active meeting; status/new shows the meeting (no free date field). `updateStatusUpdate`/`deleteStatusUpdate` gated by `assertCanModifyStatusUpdate` (privileged anytime, owner-lead before due). Inline `StatusUpdateControls` (edit modal + ✓/✗ delete). Branch: `feat/set10/R10.2-status-lifecycle`.
