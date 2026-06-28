@@ -92,3 +92,53 @@ owner-lead-before-due **OR** privileged. `submitStatusUpdate` sets `calendarEven
       history" link is still present
 - [x] Playwright: a lead meeting in window → Submit shows on both; after submitting → hidden on both
 - [x] Playwright: the submit window is configurable in PM settings and persists
+
+## Review feedback — round 3 (2026-06-28)
+
+Two issues from validation — a **model bug** (the button never appeared) and a **naming** change.
+
+### 1. Lead meetings are GLOBAL per semester, not per-project (bug)
+
+**Wrong assumption (rounds 1–2):** `getActiveLeadMeeting` filtered by the *meeting's* `projectId`, so
+it only matched a lead meeting explicitly linked to that project. But the PM schedules **leads
+meetings** on the calendar for **all** leads — they are not tied to one project. So a normal leads
+meeting (no/other project) was never found → the Submit button never appeared anywhere. (The e2e tests
+passed only because they happened to link the meeting to the project.)
+
+**Correct model:** a lead meeting applies to **every project in its semester**. The submission window
+opens `statusSubmitWindowDays` before each lead meeting; if the PM puts meetings on consecutive days
+the windows **overlap into one continuous period** (e.g. two meetings one day apart with a 3-day window
+→ ~4 days of availability). While we're outside every lead meeting's window → no Submit button at all;
+once inside **at least one** lead meeting's window → the button appears on the project page **and** the
+dashboard for that project's leads.
+
+**Fix:** `getActiveLeadMeeting(projectId)` now scopes by the **project's semester** (looks up the
+project's `semester`) and finds the **latest** `LEAD_MEETING` in that semester with
+`startsAt <= now + windowDays` — **not** filtered by the meeting's `projectId`. A project is "already
+submitted" when a `StatusUpdate` exists for `(projectId, calendarEventId = that meeting)`. (Lead
+meetings are created without a project; the calendar editor's "Project (optional)" is irrelevant to
+this lookup.) e2e helper `createLeadMeeting` updated to create the meeting in the project's semester
+(via `/calendar?semester=…`) and to stop linking it to a project.
+
+### 2. Rename "status update" → "Project Standing" (it collides with deliverable/subtask *status*)
+
+"Status" already means deliverable/subtask status and the project ON_TRACK/AT_RISK status, so the
+submission feature is renamed throughout the **UI** (not the deliverable/subtask/project status, and
+not DB columns / code identifiers):
+- "Submit Update" / "Submit Status" → **"Submit Project Standing"**
+- "Submission history" → **"Project Standing History"**
+- "Status Update" (the submission page/section/modal) → **"Project Standing"**
+- "Recent Status Updates" → **"Recent Project Standings"**
+- "Status update due" (dashboard CTA) → **"Project standing due"**
+- Other user-facing copy: history page header/labels, the landing-page blurb, the notification-engine
+  notification title/body ("Status update missing…" → "Project standing missing…"), the
+  MISSING_SUBMISSION settings label, and the MCP tool description, where they refer to this submission.
+  (Leave `SUBMIT_STATUS_UPDATES` permission label, DB tables/columns, and `submitStatusUpdate`/
+  `status-updates.ts` identifiers as-is — internal names.)
+
+**Round-3 tests:**
+- [ ] Playwright: a global LEAD_MEETING (created with no project, in the project's semester, inside the
+      window) makes the Submit button appear on the dashboard AND the project page; outside the window
+      → hidden; after submitting → hidden
+- [ ] App: the project-page button reads "Submit Project Standing"; the bottom link reads "Project
+      Standing History"; the dashboard CTA + status/new page + edit modal use the new naming
