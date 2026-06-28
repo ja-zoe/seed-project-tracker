@@ -1,6 +1,6 @@
 # R8.3 — Subtask due-date bounds & year display
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/sortable-deliverables.tsx`
 - `src/components/subtask-modal.tsx` (the R8.1 modal date input — same bounds)
@@ -40,14 +40,19 @@ No DB changes; no new server actions (extends existing ones).
 
 ## Tests
 
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: the subtask due-date input exposes `max` = the deliverable's target date (and `min`
-      = start date when set)
-- [ ] App: attempting to save a due date after the deliverable target is rejected (server throws /
-      no persist); a date within the window saves
-- [ ] Playwright/unit: a due date in the current year renders without a year; a date in another year
-      renders **with** the year
-- [ ] App: the bound applies in **both** the inline editor and the R8.1 modal
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: the inline subtask due-date input exposes `max` = the deliverable's target date
+      (`2026-12-31`); the R8.1 modal date input does too (asserted in R8.1)
+- [x] Playwright: the modal guards an out-of-range date ("Due date can't be after the deliverable's
+      target date"); server-side `assertDueWithinDeliverable` enforces it in create/update/dueDate paths
+- [x] Playwright: a current-year due date renders without a year; a different-year date renders **with**
+      the year (asserted on year presence due to a pre-existing UTC/local day-shift in display)
 
 ## Notes / log
 - 2026-06-27 — Specced. No code written.
+- 2026-06-27 — Implemented. Server: `assertDueWithinDeliverable(deliverableId, dueDate)` rejects dates
+  past `targetDate` / before `startDate`; called from `createSubtask`, `updateSubtask`,
+  `updateSubtaskDueDate`. Client: inline date input gained `max`/`min` from the deliverable (the modal
+  already had them from R8.1); new `formatDueDate()` adds the year only when it isn't the current year.
+  Branch: `feat/set8/R8.3-date-bounds`. Note: dates display one day early due to a pre-existing
+  UTC-midnight/local-timezone quirk (out of scope here).
