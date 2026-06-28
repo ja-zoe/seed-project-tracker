@@ -72,17 +72,11 @@ async function ensureTestProject(page: Page): Promise<string> {
   );
   await page.waitForLoadState("networkidle");
 
-  // Get deliverable id from the page
-  const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
-  await expect(editLink).toBeVisible({ timeout: 10_000 });
-  const editHref = await editLink.getAttribute("href");
-  const deliverableId = editHref?.match(/deliverables\/([^/]+)\/edit/)?.[1];
-  console.log("  Deliverable ID:", deliverableId);
-
-  if (!deliverableId) throw new Error("Could not extract deliverable ID");
+  // Confirm the deliverable rendered
+  const card = page.locator("[data-deliverable-id]").first();
+  await expect(card).toBeVisible({ timeout: 10_000 });
 
   // 3. Create subtask via the modal (the /subtasks/new page was removed in set 8)
-  void deliverableId;
   await page.goto(projectUrl);
   await page.waitForLoadState("networkidle");
   await addSubtaskViaModal(page, "Test Subtask");

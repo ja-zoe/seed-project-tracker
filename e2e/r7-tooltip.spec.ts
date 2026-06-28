@@ -58,8 +58,8 @@ async function getProjectWithLockedDeliverable(page: Page): Promise<string> {
   await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
   await page.waitForLoadState("networkidle");
 
-  const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
-  await expect(editLink).toBeVisible({ timeout: 10_000 });
+  const card = page.locator("[data-deliverable-id]").first();
+  await expect(card).toBeVisible({ timeout: 10_000 });
 
   // Subtask via the modal (locks the deliverable status) — /subtasks/new removed in set 8
   await page.goto(projectUrl);

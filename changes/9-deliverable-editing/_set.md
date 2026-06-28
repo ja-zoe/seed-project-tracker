@@ -12,7 +12,7 @@ on `src/components/sortable-deliverables.tsx` + `src/lib/actions/deliverables.ts
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [ ] R9.1 — Deliverable edit modal — convert the `/deliverables/[did]/edit` screen into a modal (mirrors R8.1's subtask modal); includes priority (R9.5) + group (R9.3)
+- [t] R9.1 — Deliverable edit modal — convert the `/deliverables/[did]/edit` screen into a modal (mirrors R8.1's subtask modal); includes priority (R9.5) + group (R9.3)
 - [t] R9.2 — Deliverable status + delete microinteractions — the inline deliverable **status** edit and the **delete** button use the same animated ✓/✗ `InlineConfirm` (CheckFat/XCircle) as the subtask status pill
 - [t] R9.3 — Inline group combobox — edit a deliverable's group inline via a dropdown of existing groups, with type-to-create-new
 - [t] R9.4 — Deliverable description expand + inline edit — clicking the deliverable body (not a control) shows its description; edit it inline (Markdown or plain) without a modal
