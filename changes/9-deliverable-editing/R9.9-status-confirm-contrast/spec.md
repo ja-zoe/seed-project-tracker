@@ -1,6 +1,6 @@
 # R9.9 — Status-confirm ✓ contrast on the COMPLETE (green) pill
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/sortable-deliverables.tsx` (`InlineConfirm` + `StatusPill`)
 
@@ -27,12 +27,17 @@ always renders **white text on a solid status color**, so the cleanest fix is to
 No DB changes; no new server actions — purely a styling/prop change to the shared `InlineConfirm`.
 
 ## Tests
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: pick COMPLETE on a subtask → the confirm ✓ button's computed color is **white**
-      (`rgb(255, 255, 255)`), not the green pill color; ✗ visible too
-- [ ] Playwright: on a light-background confirm (deliverable title edit), the ✓ stays green
-      (`rgb(88,129,87)`) — `default` tone unchanged
-- [ ] App (visual): the ✓ is clearly visible on every status color, including COMPLETE
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: pick COMPLETE on a subtask → the pill confirm ✓ color is **white**
+      (`rgb(255,255,255)`) on the green (`rgb(88,129,87)`) pill; visible
+- [x] Playwright: a light-background confirm (subtask title edit) keeps the green ✓ (`rgb(88,129,87)`)
+- [x] App (visual, screenshot): the ✓/✗ are clearly visible on the COMPLETE pill
+
+Implemented an `InlineConfirm` `tone?: "default" | "onColor"` prop; the subtask `StatusPill` passes
+`tone="onColor"` (white icons on the solid pill). The deliverable status confirm (R9.2) sits on the
+white card, so it keeps the default green — no change needed there.
 
 ## Notes / log
 - 2026-06-28 — Specced. No code written.
+
+- 2026-06-28 — Implemented & Playwright-verified. Branch: `feat/set9/R9.9-confirm-contrast`.
