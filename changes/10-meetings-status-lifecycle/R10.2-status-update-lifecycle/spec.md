@@ -64,3 +64,31 @@ owner-lead-before-due **OR** privileged. `submitStatusUpdate` sets `calendarEven
   `submissionDeadlineHours`; exact privileged permission (new `MANAGE_STATUS_UPDATES` vs `MANAGE_PROJECTS`).
 
 - 2026-06-28 — Implemented & Playwright-verified. `getActiveLeadMeeting` (lib); submit links the meeting + derives meetingDate + isLate(now>startsAt); button gated on an active meeting; status/new shows the meeting (no free date field). `updateStatusUpdate`/`deleteStatusUpdate` gated by `assertCanModifyStatusUpdate` (privileged anytime, owner-lead before due). Inline `StatusUpdateControls` (edit modal + ✓/✗ delete). Branch: `feat/set10/R10.2-status-lifecycle`.
+
+## Review feedback — round 2 (2026-06-28)
+
+**Problems found in validation:**
+1. The **dashboard** still showed "No update submitted yet · Submit update →" for every assigned
+   project regardless of the lead meeting — its widget was never gated on the lead meeting / window
+   (only the project page was). It should appear on the dashboard only when the project has an active
+   lead meeting in the window **and** nothing has been submitted for it yet.
+2. The submit-window setting was hard to find — it sat next to the now-**obsolete** "Submission
+   deadline (hours before meeting)" field (R10.2 retired `submissionDeadlineHours` as the status
+   late-marking source), which was confusing.
+
+**Fixes:**
+- New `getStatusSubmissionState(projectId)` (lib): active lead meeting + whether an update already
+  exists for it → `canSubmit = active && !submitted`.
+- **Project page:** `canSubmitStatus = isLead && submissionState.canSubmit` (adds the "not yet
+  submitted" condition). "Submission history →" stays unconditionally at the bottom.
+- **Dashboard:** the per-project Submit CTA is gated on `canSubmit` (active meeting + not submitted +
+  the user is LEAD/SUBLEAD of that project) and is **hidden** otherwise. CTA text is now "Status update
+  due".
+- **Settings:** removed the obsolete "Submission deadline (hours)" field (and its handling in
+  `updateSettings`); the single, clear **"Status submit window (days before a lead meeting)"** remains.
+
+**Round-2 tests:**
+- [x] Playwright: no lead meeting → Submit hidden on dashboard AND project page; the "Submission
+      history" link is still present
+- [x] Playwright: a lead meeting in window → Submit shows on both; after submitting → hidden on both
+- [x] Playwright: the submit window is configurable in PM settings and persists
