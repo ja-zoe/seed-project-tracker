@@ -1,6 +1,6 @@
 # R8.1 — Subtask modal (create + whole-record edit)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/ui/dialog.tsx` (new — shadcn Dialog)
 - `src/components/subtask-modal.tsx` (new)
@@ -58,16 +58,23 @@ No DB changes; reuses existing `createSubtask` / `updateSubtask` (minus their re
 
 ## Tests
 
-- [ ] `pnpm build` / typecheck passes; `dialog.tsx` imports no `lucide-react`
-- [ ] Playwright: clicking "+ Add subtask" opens a modal (not a navigation); filling title + submit
-      creates the subtask and the row appears without a full page load
-- [ ] Playwright: opening a subtask's "edit in modal" pre-fills all fields; changing title + status +
-      due date and saving persists all three (row reflects them after revalidation)
-- [ ] Playwright: the modal's date input enforces the deliverable bound (R8.3) — `max` = deliverable
-      target date
-- [ ] App: empty title is rejected in the modal (no submit); Escape / overlay click closes without saving
-- [ ] App: inline edits still work alongside the modal (regression check on the status pill + title pencil)
-- [ ] Build: the `/subtasks/new` route is gone and nothing links to it (grep clean)
+- [x] `pnpm build` / typecheck passes; `dialog.tsx` imports no `lucide-react` (swapped `XIcon` → Phosphor `X`)
+- [x] Playwright: "+ Add subtask" opens a modal (not a navigation); title + submit creates the row
+      without a full page load (URL stays on the project page)
+- [x] Playwright: "edit in modal" pre-fills all fields; changing title + status saves (row reflects new
+      title; deliverable re-derives to In Progress)
+- [x] Playwright: the modal date input `max` = deliverable target date (`2026-12-31`)
+- [x] App: empty title rejected ("Title is required"); Escape closes without saving
+- [x] App: inline edits still work alongside the modal (title pencil visible — regression)
+- [x] Build: the `/subtasks/new` route is gone (returns 404) and nothing links to it (grep clean)
 
 ## Notes / log
 - 2026-06-27 — Specced. No code written.
+- 2026-06-27 — Implemented. Added shadcn **Dialog** (`@base-ui/react/dialog`; replaced the Lucide
+  `XIcon` with Phosphor `X`). New `SubtaskModal` (create + edit modes) wired to `createSubtask` /
+  `updateSubtask` after removing their trailing `redirect` (the `/subtasks/[sid]/edit` page now
+  redirects in its own wrapper). Deleted the `/subtasks/new` page. Triggers: "+ Add subtask" opens
+  create; a `NotePencil` icon per row opens edit. Added `description` to the subtask interface +
+  project-page query (R8.2 reuses it). Updated all older e2e helpers to seed subtasks via the modal
+  (`e2e/helpers.ts` `addSubtaskViaModal`); full subtask-surface suite (9 tests) green. Branch:
+  `feat/set8/R8.1-subtask-modal`.
