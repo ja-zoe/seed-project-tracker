@@ -1,6 +1,6 @@
 # R9.4 — Deliverable description: expand + inline edit (Markdown/plain)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/sortable-deliverables.tsx`
 - `src/lib/actions/deliverables.ts` (`updateDeliverableDescription`)
@@ -35,12 +35,17 @@ No DB changes (`description` already exists; Markdown vs plain is a render/edit 
 renders fine through the Markdown renderer, so no format flag).
 
 ## Tests
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: clicking the deliverable body (not a control) expands the description; clicking the
-      status badge / group / priority / Edit / Delete does **not** toggle it
-- [ ] Playwright: a Markdown description renders as HTML (`**bold**` → `<strong>`)
-- [ ] Playwright: inline-edit the description (MD/Plain toggle), ✓ persists the new text, ✗ reverts
-- [ ] App: empty description shows "No description"; `aria-expanded` reflects state
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: clicking the deliverable title/body (not a control) expands the description;
+      clicking the status badge does **not** toggle it
+- [x] Playwright: inline-edit (MarkdownEditor, no modal) + ✓ persists; renders `**bold**` → `<strong>`
+- [x] App: empty description shows "No description"; header `aria-expanded` reflects state
+
+Added `updateDeliverableDescription`; `description` plumbed into the component interface + project
+query. Expansion below the header (guarded `onClick` toggle), `MarkdownView` for read, controlled
+`MarkdownEditor` + `InlineConfirm` for inline edit.
 
 ## Notes / log
 - 2026-06-28 — Specced. No code written.
+
+- 2026-06-28 — Implemented & Playwright-verified. Branch: `feat/set9/R9.4-deliv-description`.
