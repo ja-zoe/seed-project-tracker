@@ -1,9 +1,8 @@
 # R8.6 — Status-update Prisma null constraint (bug)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
-- `src/lib/actions/status-updates.ts`
-- possibly `prisma/schema.prisma` + a DDL patch applied via `scripts/apply-schema.ts` (TBD after step 1)
+- DDL patch `fix.sql` (applied via `scripts/apply-schema.ts`) — no app-code change needed
 
 ## Spec
 
@@ -46,13 +45,38 @@ is Prisma/pg-adapter failing to map the violated constraint.
 
 ## Tests
 
-- [ ] Diagnosis script output recorded in this feature's log (the offending column + its constraint)
-- [ ] `pnpm build` / typecheck passes
-- [ ] App: submitting a complete status update creates a `StatusUpdate` row and redirects to the
-      project (no `PrismaClientKnownRequestError`)
-- [ ] App: the late-marking path still works (`isLate` set correctly relative to `meetingDate` −
-      `submissionDeadlineHours`)
-- [ ] If a DDL patch was applied: the exact SQL is captured in `_set.md` "DB changes in this set"
+- [x] Diagnosis recorded (below): `updatedAt` column was NOT NULL with no default
+- [x] Playwright `r8-status-update`: assign a LEAD, submit a complete status update → redirects to the
+      project with **no** `PrismaClientKnownRequestError`, and the update appears in `/history`
+- [x] DDL patch SQL captured in this feature's `fix.sql` and in `_set.md` "DB changes in this set"
+
+## Diagnosis (step 1)
+
+Introspected `information_schema.columns` for `StatusUpdate`. The live table has two columns the
+Prisma model doesn't declare:
+- `createdAt` — NOT NULL, **default `CURRENT_TIMESTAMP`** → fine (insert omits it, DB fills it).
+- `updatedAt` — NOT NULL, **default `null`** → **the bug.** Prisma never sends it (not in the model)
+  and there's no default, so every `INSERT` violates the NOT NULL constraint. Prisma's pg adapter
+  couldn't map the constraint name, hence "(not available)".
+
+`id` is also NOT NULL with no DB default, but Prisma supplies it client-side via `@default(cuid())`,
+so it's never the offender.
+
+## Fix
+
+Surgical DDL patch (lowest risk; no Prisma client regen): give `updatedAt` a default so inserts that
+omit it succeed.
+
+```sql
+ALTER TABLE "StatusUpdate" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
+```
+
+Applied with `tsx scripts/apply-schema.ts` (per `CONTEXT.md` — never `prisma db push`). Verified the
+column default flipped from `null` → `CURRENT_TIMESTAMP`. `submittedAt` (already in the model) and
+`createdAt` remain; the model intentionally stays unaware of the DB-managed `createdAt`/`updatedAt`
+(both now have defaults, so inserts succeed). No app-code change.
 
 ## Notes / log
-- 2026-06-27 — Specced. No code written. Root cause to be confirmed by the step-1 introspection script.
+- 2026-06-27 — Diagnosed via introspection script; root cause = `updatedAt` NOT NULL no-default.
+  Applied `fix.sql` DDL patch via `scripts/apply-schema.ts`. Playwright end-to-end submit passes
+  (row created, appears in history). Branch: `feat/set8/R8.6-status-null`.
