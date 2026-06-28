@@ -143,3 +143,52 @@ not DB columns / code identifiers):
 - [x] App: renamed throughout — button "Submit Project Standing", bottom link "Project Standing
       History", section "Recent Project Standings", dashboard CTA, status/new page, edit modal
 - [x] Full e2e suite green (33 passed; lead meetings now isolated per-semester in tests)
+
+## Review feedback — round 4 (2026-06-28)
+
+**Problem (reported):** "When I place a leads meeting in the calendar, the Submit Project Standing button
+still doesn't show up on the project page or the dashboard."
+
+**Root cause (reproduced with Playwright):** the round-3 gating matched a lead meeting to a project by
+**exact free-text `semester` string equality** (`getActiveLeadMeeting` used `semester: project.semester`).
+When a PM places a leads meeting on the calendar, the event silently inherits whatever semester the
+**calendar is currently showing** (it defaults to the most-recent semester alphabetically). If that string
+isn't character-for-character identical to the project's semester, the meeting governed **no** projects
+and the button never appeared — with no feedback. The round-1–3 tests never caught this because the e2e
+helper passed the *same* semester string to both `createProject` and `createLeadMeeting`. A repro test
+that created the meeting under the calendar's *default* semester showed count = 0.
+
+**Fix (chosen with the user): explicit semester pinning + a no-typo semester picker.**
+- *DB:* `CalendarEvent.semesters String[] @default([])` — the set of semesters a lead/eboard meeting is
+  pinned to (always includes the primary `semester`; for other event types it's just `[semester]`).
+  DDL: `ALTER TABLE "CalendarEvent" ADD COLUMN "semesters" TEXT[] NOT NULL DEFAULT '{}';` then backfill
+  `UPDATE "CalendarEvent" SET "semesters" = ARRAY["semester"] WHERE "semesters" = '{}';` (via
+  `scripts/apply-schema.ts`).
+- *Gating:* `getActiveLeadMeeting` now matches `semesters: { has: project.semester }` instead of exact
+  `semester` equality. A leads meeting governs **every project whose semester is in its pinned set**.
+- *Calendar editor:* when the event type is **LEAD_MEETING / EBOARD_MEETING**, a checkbox group ("Applies
+  to semesters", `data-testid="meeting-semesters"`) lets the PM pin the meeting to any set of existing
+  semesters; the active semester is pre-checked. `createEvent`/`updateEvent` read `semesters[]` (helper
+  `resolveSemesters`); submit is disabled until ≥1 semester is picked. Calendar list query filters by
+  `semesters has activeSemester`, so a multi-pinned meeting shows in each of its semesters.
+- *Semester picker (no-typo guard):* new `SemesterField` / `SemesterFormField` (`src/components/
+  semester-field.tsx`) — a dropdown of existing semesters plus a "+ New semester…" custom option. Used on
+  the New Project page and in the Edit-project modal so project + meeting semester strings can't silently
+  diverge.
+
+**Files (round 4):** `prisma/schema.prisma`, `src/lib/lead-meeting.ts`, `src/lib/actions/calendar.ts`,
+`src/app/(app)/calendar/page.tsx`, `src/components/semester-calendar.tsx`, `src/components/semester-field.tsx`
+(new), `src/app/(app)/projects/new/page.tsx`, `src/components/project-modal.tsx`,
+`src/app/(app)/projects/[id]/page.tsx`, `e2e/helpers.ts`, `e2e/r10-semester-pinning.spec.ts` (new).
+
+**Round-4 tests:**
+- [x] `pnpm build` passes (typecheck clean)
+- [x] Playwright (`r10-semester-pinning`): a lead meeting pinned to a **different** semester leaves the
+      button hidden on both project page and dashboard; pinning a meeting to the project's **own**
+      semester makes it appear on both
+- [x] Playwright (`r10-semester-pinning`): one meeting pinned to **two** semesters opens the button for a
+      project in each
+- [x] Playwright: existing `r10-submit-gating` + `r10-status-lifecycle` still green with the new
+      semester-picker + pinning helpers
+- [x] Visual verification by the user (passed); full e2e regression sweep started but stopped early
+      on the user's go-ahead to merge — the round-4 + R10.2 targeted suites above are green
