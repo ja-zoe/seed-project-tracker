@@ -1,6 +1,6 @@
 # R7.1 — Subtask row polish (status bullet + pill padding + click-name-to-reassign)
 
-**Status:** tests passing
+**Status:** in progress (round 2 — review feedback)
 **Files:**
 - `src/components/sortable-deliverables.tsx`
 
@@ -82,6 +82,49 @@ No DB changes; no new server actions (reuses `updateSubtaskAssignee` from R6.3 v
       that opens the picker
 - [ ] App: pick a member → confirm → assignee persists on reload
 - [ ] App: viewer (`canEdit=false`) sees a static assignee name with no click affordance
+
+## Review feedback — round 2 (2026-06-27)
+
+User review of the merged R7.1 work surfaced three defects in the click-to-reassign flow plus a
+placement issue. Reopened to address them.
+
+**Problem:**
+1. **Every row's assignee picker opens at once.** `assigneePickerOpen` is a single **global boolean**
+   (`useState(false)`) but it gates the `AssigneeSearch` render inside **every** subtask's map
+   (`sortable-deliverables.tsx` ~line 970: `{assigneePickerOpen && <AssigneeSearch …/>}`). Clicking
+   one assignee name sets it `true`, so all rows mount their picker simultaneously.
+2. **Picker isn't auto-focused, and there's no keyboard selection.** Once scoped to one row the
+   search input should focus, but the picker is still mouse-only — no arrow-key navigation or
+   `Enter`-to-select.
+3. **Title-edit confirm is at the far right of the row.** When editing a subtask **title**, the
+   `✓ / ✗` confirm lives in Panel B at the row's right edge (~lines 1052–1078), far from the title
+   input the user is typing in. It should sit **next to the title**.
+
+**Approach:**
+- **Scope the picker to the edited row.** Gate the `AssigneeSearch` render on the row actually being
+  edited: `assigneePickerOpen && isEditing && editField === "assignee"` (i.e. only when
+  `pendingEdit?.subtaskId === subtask.id` and the field is `assignee`). Only the clicked row mounts a
+  picker. (Equivalently, drop the separate boolean and derive open-state from `pendingEdit`.)
+- **Auto-focus + keyboard nav in `AssigneeSearch`.** Keep the existing `inputRef.current?.focus()`
+  on mount (now unambiguous with a single picker). Add an `activeIndex` over the option list
+  `[None, ...filtered]`: `ArrowDown`/`ArrowUp` move the highlight (clamp at ends), `Enter` selects the
+  active option (calls the existing `onSelect`), `Escape` closes. Reset `activeIndex` to `0` whenever
+  `query` changes. Highlight the active row visually (`bg-muted`/`text-primary`). Typing still filters;
+  the input stays focused throughout.
+- **Move the title confirm next to the title.** When `editField === "title"`, render an `InlineConfirm`
+  (the icon version from R7.2 round 2) **immediately after the title `<input>`** in the left title
+  flex, and **suppress Panel B for the title field** (Panel B continues to serve the `dueDate` edit).
+  Assignee commits via the picker (`Enter`/click), so it doesn't rely on Panel B either.
+
+**Round-2 tests:**
+- [ ] `pnpm build` / typecheck passes
+- [ ] Playwright: clicking one subtask's assignee name opens **exactly one** picker
+      (`[data-testid="assignee-picker"]` count === 1), anchored under that row; other rows show none
+- [ ] Playwright: on open, the picker's search input is `document.activeElement`; pressing
+      `ArrowDown` then `Enter` selects a member (assignee name updates after confirm)
+- [ ] Playwright: while editing a title, the `✓ / ✗` confirm renders adjacent to the title input
+      (its x-position is near the title, not at the row's right edge)
+- [ ] App: keyboard-only reassign (focus name → Enter/Space opens → arrows → Enter) works end-to-end
 
 ## Notes / log
 - 2026-06-27 — Specced. No code written.

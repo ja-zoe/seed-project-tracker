@@ -11,9 +11,9 @@ and extending inline editing to deliverable fields. All features touch
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [t] R7.1 — Subtask row polish — restore the far-left status bullet (visual only, glows on hover/edit); more vertical padding on the status pill; reassign by clicking the assignee name (remove the separate UserCircle button)
-- [t] R7.2 — Confirm microinteractions — animated select→confirm and confirm→result transitions; shared `InlineConfirm` primitive (consumed by R7.4)
-- [t] R7.3 — Deliverable lock tooltip — replace the broken custom hover tooltip with the shadcn Tooltip component
+- [~] R7.1 — Subtask row polish — bullet/padding/click-name-to-reassign **[round 2: scope picker to one row, autofocus + keyboard nav, title confirm next to title]**
+- [~] R7.2 — Confirm microinteractions — animated transitions + shared `InlineConfirm` **[round 2: use CheckFat/XCircle icons like everything else]**
+- [~] R7.3 — Deliverable lock tooltip — shadcn Tooltip **[round 2: drop cursor-help on the locked badge]**
 - [t] R7.4 — Inline deliverable editing — edit deliverable title, start date, and end date (`targetDate`) inline using the R7.2 microinteraction
 
 ## Sequencing & file overlap
@@ -47,3 +47,7 @@ not violate the Lucide ban — verify the generated file imports none.
 - 2026-06-27 — Set 7 scaffolded; R7.1–R7.4 specced. No code written. Skill updated to state
   the user is the final merge-to-`main` gate only after the agent self-verifies (incl.
   Playwright for UI).
+- 2026-06-27 — R7.1–R7.4 implemented, Playwright-verified, and merged into the set branch.
+- 2026-06-27 — User review (the set→main gate) reopened R7.1/R7.2/R7.3 with round-2 feedback
+  (`[~]`); each feature file has a "Review feedback — round 2" section. R7.4 unchanged. Set
+  stays open; new/unrelated work moved to Set 8.

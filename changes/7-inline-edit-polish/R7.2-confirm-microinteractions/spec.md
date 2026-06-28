@@ -1,6 +1,6 @@
 # R7.2 — Confirm microinteractions
 
-**Status:** tests passing
+**Status:** in progress (round 2 — review feedback)
 **Files:**
 - `src/components/sortable-deliverables.tsx`
 - `src/app/globals.css`
@@ -58,6 +58,29 @@ No DB changes; no new server actions. Commit/revert still go through the existin
 - [ ] App (manual — headless can't assert "smoothness"): select→confirm and confirm→result
       transitions are visibly smooth (~150–200 ms), not instant snaps
 - [ ] App: with OS "reduce motion" enabled, the change is instant (no pop, no slide)
+
+## Review feedback — round 2 (2026-06-27)
+
+**Problem:** `InlineConfirm` renders the confirm/cancel affordances as the **text glyphs** `✓` and
+`✗` (with a `|` divider), but the rest of the app's confirm controls — notably the subtask edit
+Panel B (`sortable-deliverables.tsx` ~lines 1060–1077) — use Phosphor icons: `CheckFat`
+(`weight="fill"`, green `#588157`) for confirm and `XCircle` (`weight="bold"`) for cancel. The pill's
+text glyphs look inconsistent next to them.
+
+**Approach:** Replace the `✓` / `✗` text in `InlineConfirm` with the **same icons** used everywhere
+else — `<CheckFat size={13} weight="fill" />` in `#588157` for confirm, `<XCircle size={13}
+weight="bold" />` for cancel — and drop the `|` divider (keep a small `gap`). Keep them **inline in
+the pill** with the existing slide-in (`max-w` + `opacity` transition); widen the expanded `max-w` a
+touch if the icons need more room than the glyphs. Because `InlineConfirm` is the shared primitive,
+this also updates R7.4's deliverable title/date confirms — consistent across the whole inline-edit
+surface.
+
+**Round-2 tests:**
+- [ ] `pnpm build` / typecheck passes
+- [ ] Playwright: after picking a status, the pill's confirm/cancel buttons render `svg` icons (not
+      a `✓`/`✗` text node); the confirm button's icon matches the subtask edit panel's `CheckFat`
+- [ ] Playwright: clicking the icon-confirm still commits the status (label + bg update); cancel reverts
+- [ ] App: the pill confirm icons visually match the row's edit-panel icons (same glyph, weight, green)
 
 ## Notes / log
 - 2026-06-27 — Specced. No code written. Establishes the `InlineConfirm` primitive reused by R7.4.

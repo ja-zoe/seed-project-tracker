@@ -1,6 +1,6 @@
 # R7.3 — Deliverable lock tooltip (shadcn Tooltip)
 
-**Status:** tests passing
+**Status:** in progress (round 2 — review feedback)
 **Files:**
 - `src/components/ui/tooltip.tsx` (new — shadcn, uses `@base-ui/react/tooltip`)
 - `src/components/sortable-deliverables.tsx`
@@ -60,6 +60,20 @@ No DB changes; no new server actions.
 
 Note: Base UI does not attach `role="tooltip"` — test uses `[data-slot="tooltip-content"]` selector.
 `asChild` not supported by Base UI — badge wrapped via `render` prop on `TooltipTrigger`.
+
+## Review feedback — round 2 (2026-06-27)
+
+**Problem:** The locked deliverable badge sets `cursor-help` on its `<span>`
+(`sortable-deliverables.tsx` ~line 606). The user wants **no cursor change** on hover — just the
+tooltip.
+
+**Approach:** Remove `cursor-help` from the locked badge's className (leave the default cursor). The
+Tooltip still triggers on hover; only the cursor styling changes.
+
+**Round-2 tests:**
+- [ ] `pnpm build` / typecheck passes
+- [ ] Playwright: the locked badge's computed `cursor` is not `help` (default/`auto`); the tooltip
+      still appears on hover with the correct `LOCK_REASON` text
 
 ## Notes / log
 - 2026-06-27 — Implemented. `pnpm dlx shadcn@latest add tooltip` generated a Base UI-backed component (not Radix). Removed the old broken `group/badge` absolute-div tooltip. Added `LOCK_REASON` map, `TooltipProvider` in app layout. Playwright passes. Branch: `feat/set7/R7.3-deliverable-lock-tooltip`.
