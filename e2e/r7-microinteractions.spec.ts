@@ -133,6 +133,18 @@ test.describe("R7.2 — confirm microinteractions", () => {
     await expect(confirmBtn).toBeVisible({ timeout: 3_000 });
     await expect(cancelBtn).toBeVisible({ timeout: 3_000 });
 
+    // ── R7.2 round-2: confirm/cancel render Phosphor icons, not ✓/✗ glyphs ──
+    const confirmHasSvg = await confirmBtn.locator("svg").count();
+    const cancelHasSvg = await cancelBtn.locator("svg").count();
+    expect(confirmHasSvg).toBeGreaterThan(0);
+    expect(cancelHasSvg).toBeGreaterThan(0);
+    const confirmText = (await confirmBtn.textContent())?.trim() ?? "";
+    expect(confirmText).not.toContain("✓");
+    // Confirm icon should be green (#588157 → rgb(88, 129, 87)) like the row edit panel
+    const confirmColor = await confirmBtn.evaluate((el) => window.getComputedStyle(el).color);
+    console.log("  Confirm icon color:", confirmColor);
+    expect(confirmColor).toBe("rgb(88, 129, 87)");
+
     // status-pill (idle button) removed
     await expect(pillBtn).toHaveCount(0);
 
