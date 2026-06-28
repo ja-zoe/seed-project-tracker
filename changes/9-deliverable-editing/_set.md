@@ -20,7 +20,7 @@ on `src/components/sortable-deliverables.tsx` + `src/lib/actions/deliverables.ts
 - [t] R9.6 — Group filter + within-group ordering — filter deliverables by group; reorder within a group; default sort is by priority (highest at top)
 - [ ] R9.7 — Subtask description inline edit — edit a subtask's description inline (Markdown/plain) in the expanded region, like the deliverable description (R9.4)
 - [ ] R9.8 — Project edit modal — convert the `/projects/[id]/edit` screen into a modal (mirrors R9.1/R8.1)
-- [ ] R9.9 — Status-confirm contrast — the confirm ✓ is invisible on the COMPLETE (green) status pill; make it legible on any pill color
+- [t] R9.9 — Status-confirm contrast — the confirm ✓ is invisible on the COMPLETE (green) status pill; make it legible on any pill color
 - [t] R9.10 — e2e test cleanup — tag test projects and auto-delete them after the run (no manual cleanup)
 
 **Added 2026-06-28 (round 2):** R9.7–R9.10 — editing-UX/bug/test refinements requested by the user
