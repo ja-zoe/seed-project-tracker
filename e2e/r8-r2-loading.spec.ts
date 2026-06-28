@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
-import { login, createProject } from "./helpers";
+import { login, createProject, addSelfAsLead, createLeadMeeting, dtLocal, E2E_MARKER } from "./helpers";
 
 const SCREENSHOTS_DIR = path.join(
   __dirname,
@@ -18,33 +18,24 @@ test.describe("R8.6 round-2 — status-update submit loading state", () => {
 
   test("the Submit Update button shows a pending state and disables while submitting", async ({ page }) => {
     await login(page);
-    const projectUrl = await createProject(page, `R8.6r2 ${Date.now()}`);
-
-    // Assign the dev user as LEAD so they can submit
-    await page.goto(`${projectUrl}/members`);
-    await page.waitForLoadState("networkidle");
-    const userSelect = page.locator('select[name="userId"]');
-    const opts = await userSelect.locator("option").evaluateAll((os) =>
-      (os as HTMLOptionElement[]).map((o) => ({ value: o.value, text: o.textContent ?? "" }))
-    );
-    const jav = opts.find((o) => o.text.includes("jav273"));
-    if (!jav) throw new Error("jav273 not in member options");
-    await userSelect.selectOption(jav.value);
-    await page.locator('select[name="role"]').selectOption("LEAD");
-    await page.getByRole("button", { name: "Add to Project" }).click();
-    await page.waitForLoadState("networkidle");
+    const semester = `Test ${Date.now()}`;
+    const name = `R8.6r2 ${Date.now()}`;
+    const projectUrl = await createProject(page, name, semester);
+    await addSelfAsLead(page, projectUrl);
+    // A lead meeting (in the submit window) is required to submit (R10.2)
+    await createLeadMeeting(page, E2E_MARKER + "R8.6r2 lead mtg", dtLocal(86_400_000), semester);
 
     // Open the status form
     await page.goto(projectUrl);
     await page.waitForLoadState("networkidle");
-    await page.getByRole("link", { name: "Submit Update" }).click();
+    await page.getByRole("link", { name: "Submit Project Standing" }).click();
     await page.waitForLoadState("networkidle");
     await page.fill('textarea[name="plannedWork"]', "Planned");
     await page.fill('textarea[name="actualProgress"]', "Actual");
     await page.fill('textarea[name="blockers"]', "None");
     await page.fill('textarea[name="nextWeekGoals"]', "Next");
 
-    const submit = page.getByRole("button", { name: "Submit Update" });
+    const submit = page.getByRole("button", { name: "Submit Project Standing" });
     await expect(submit).toBeVisible();
 
     // Delay only the first server-action POST so the pending state is observable

@@ -16,7 +16,12 @@ export default async function globalTeardown() {
       'DELETE FROM "Project" WHERE name LIKE $1 RETURNING id',
       [E2E_MARKER + "%"]
     );
-    console.log(`\n[e2e teardown] deleted ${res.rowCount} test project(s).`);
+    // Calendar events aren't owned by a project — clean the marker-tagged ones too.
+    const ev = await client.query(
+      'DELETE FROM "CalendarEvent" WHERE title LIKE $1 RETURNING id',
+      [E2E_MARKER + "%"]
+    );
+    console.log(`\n[e2e teardown] deleted ${res.rowCount} test project(s), ${ev.rowCount} test event(s).`);
   } catch (e) {
     console.error("[e2e teardown] cleanup failed:", (e as Error).message);
   } finally {

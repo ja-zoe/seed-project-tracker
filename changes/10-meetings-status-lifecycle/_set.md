@@ -15,15 +15,15 @@ meeting types with role-based visibility, makes the status-submit window configu
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [ ] R10.1 — Calendar meeting types & visibility — add **LEAD_MEETING** + **EBOARD_MEETING** calendar
+- [t] R10.1 — Calendar meeting types & visibility — add **LEAD_MEETING** + **EBOARD_MEETING** calendar
       event types; only leads + eboard can see lead/eboard meetings; make the status-submit window
       (default 3 days before a lead meeting) **configurable** in Settings (**DB change**)
-- [ ] R10.2 — Status-update lifecycle — each status update links to a **lead meeting**; the "Submit
+- [t] R10.2 — Status-update lifecycle — each status update links to a **lead meeting**; the "Submit
       Update" button only appears within the configurable window before that meeting; leads can
       **edit/delete** their own update **before** the meeting/due time; late submissions are allowed but
       **marked late**; after due, leads can't edit; users with the right permission can **edit/delete**
       any status update at any time — inline, with the deliverable/subtask **confirm microinteractions**
-- [ ] R10.3 — Calendar export — export a user's calendar to **Google Calendar** and as an **ICS** file;
+- [t] R10.3 — Calendar export — export a user's calendar to **Google Calendar** and as an **ICS** file;
       a general member's export **excludes** lead/eboard meetings
 
 ## Sequencing & file overlap
@@ -59,9 +59,17 @@ meeting types with role-based visibility, makes the status-submit window configu
 - `Settings`: add a configurable status-submit window (e.g. `statusSubmitWindowDays Int @default(3)`).
 - `StatusUpdate`: add `calendarEventId` (FK to the lead meeting) — pending Q2/Q4.
 - Possibly a new `Permission` value(s) + an "Eboard" role (Q1). Apply all via `scripts/apply-schema.ts`.
+- (R10.2 round 4) `CalendarEvent.semesters String[] @default([])` — semesters a lead/eboard meeting is
+  pinned to. `ALTER TABLE "CalendarEvent" ADD COLUMN "semesters" TEXT[] NOT NULL DEFAULT '{}';` then
+  `UPDATE "CalendarEvent" SET "semesters" = ARRAY["semester"] WHERE "semesters" = '{}';`.
 
 ## Log
 - 2026-06-28 — Set 10 outlined (theme + features + open questions).
 - 2026-06-28 — R10.1–R10.3 specs written with the user's confirmed defaults. No code yet; gated on the
   user's review (esp. the DB changes: `CalendarEventType` values, `Settings.statusSubmitWindowDays`,
   `Permission.VIEW_LEAD_MEETINGS`, an Eboard role, and `StatusUpdate.calendarEventId`).
+- 2026-06-28 — R10.2 round 4: fixed the Submit-button gating. Root cause was exact free-text `semester`
+  string matching between a lead meeting and a project; a meeting placed under the calendar's default
+  semester governed no projects. Added `CalendarEvent.semesters[]` + explicit semester pinning in the
+  calendar editor, a no-typo `SemesterField` picker on project forms, and a Playwright test
+  (`r10-semester-pinning`) that reproduces the bug. Branch `feat/set10/R10.2-r4-semester-pinning`.
