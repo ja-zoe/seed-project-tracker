@@ -37,3 +37,8 @@ None. Confirmed with the user 2026-06-28:
 ## Log
 - 2026-06-28 — Set 11 outlined and scaffolded (theme + R11.1/R11.2 specs). User confirmed the new
   permission + full MCP scope. Branch `feat/set11-meeting-delete-mcp`.
+- 2026-06-28 — R11.1 implemented, verified (build + `e2e/r11-meeting-delete.spec.ts`), merged to the set
+  branch. DB: `Permission.MANAGE_MEETING_RECORDS` applied + seeded to PM.
+- 2026-06-28 — R11.2 implemented, verified by curl (PM + Viewer-role member tokens), merged to the set
+  branch. Both features `[x]`. Final integration check on the set branch passes: `pnpm build` clean +
+  e2e green + app boots. **Awaiting user approval to merge `feat/set11-meeting-delete-mcp` into `main`.**
