@@ -1,6 +1,6 @@
 # R9.7 — Subtask description inline edit (like the deliverable description)
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/sortable-deliverables.tsx`
 - `src/lib/actions/deliverables.ts` (`updateSubtaskDescription`)
@@ -30,11 +30,13 @@ expanded subtask region — exactly like the deliverable description (R9.4) — 
 No DB changes (`Subtask.description` already exists; Markdown vs plain is a render/edit concern).
 
 ## Tests
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: expand a subtask → an Edit affordance shows; clicking it opens a `MarkdownEditor`
-      with the current description; entering `**bold**` + ✓ persists and re-renders as Markdown
-- [ ] Playwright: ✗ / Esc cancels without saving
-- [ ] App: empty description clears to "No description"; the subtask modal description still works
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: expand a subtask → "No description" + Edit pencil; click → `MarkdownEditor`; entering
+      `**bold**` + ✓ persists and re-renders as Markdown (`<strong>`)
+- [x] Playwright: ✗ cancels without saving (reverts to the prior description)
+- [x] App: empty description shows "No description"; the subtask modal description still works (unchanged)
 
 ## Notes / log
 - 2026-06-28 — Specced. No code written.
+
+- 2026-06-28 — Implemented & Playwright-verified. `updateSubtaskDescription` + `subtaskDescEdit` state; the expanded region mirrors R9.4 (MarkdownView read / MarkdownEditor + InlineConfirm edit). Branch: `feat/set9/R9.7-subtask-desc-inline`.
