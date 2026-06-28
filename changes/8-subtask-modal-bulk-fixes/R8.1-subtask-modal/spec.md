@@ -102,7 +102,11 @@ ships `react-markdown` + `remark-gfm` and a `MarkdownEditor` component with an M
   text renders fine through the Markdown renderer, so no per-record format flag is needed.
 
 **Round-2 tests:**
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: the modal description field offers an MD/Plain toggle; entering Markdown (e.g.
-      `**bold**`) and saving persists it; the expanded row (R8.2) renders it as Markdown
-- [ ] App: plain text still saves and displays unchanged
+- [x] `pnpm build` / typecheck passes (existing R8.1 test still green — textarea keeps its testid)
+- [x] Playwright: the modal description offers MD/Plain + Write/Preview; Preview renders Markdown;
+      entering `**bold via modal**` and saving round-trips to the expanded row as a `<strong>`
+- [x] App: Plain mode hides the Write/Preview tabs; plain text still saves and displays unchanged
+
+Implemented by making `MarkdownEditor` optionally **controlled** (`value` + `onChange`, `name` now
+optional, `textareaTestId` passthrough) and using it for the modal's Description (controlled by the
+modal's existing `description` state). No DB change.
