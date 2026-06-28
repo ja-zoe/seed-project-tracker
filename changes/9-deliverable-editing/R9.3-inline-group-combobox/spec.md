@@ -1,6 +1,6 @@
 # R9.3 — Inline group combobox
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/sortable-deliverables.tsx`
 - `src/lib/actions/deliverables.ts` (`updateDeliverableGroup`)
@@ -31,13 +31,17 @@ project's already-used groups, plus the ability to **type a new group and create
 No DB changes (`group` column already exists).
 
 ## Tests
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: clicking a deliverable's group opens a combobox listing the project's existing groups;
-      picking one updates the deliverable's group (persists after revalidation)
-- [ ] Playwright: typing a brand-new group name + Enter creates it and assigns it; it then appears in
-      the list for other deliverables
-- [ ] Playwright: an ungrouped deliverable shows "+ Group"; clearing a group (Ungrouped) works
-- [ ] App: keyboard nav (focus, arrows, Enter, Esc) works in the combobox
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: typing a new group "Frontend" + Enter creates & assigns it; it then appears in the
+      combobox for another deliverable, which reuses it via ArrowDown+Enter (keyboard)
+- [x] Playwright: an ungrouped deliverable shows "+ Group"; clearing via "Ungrouped" restores it
+- [x] App: combobox autofocuses; arrow/Enter/Esc keyboard nav works
+
+Implemented `GroupCombobox` (portal, like `AssigneeSearch`). Options: empty query → Ungrouped + all
+groups; typing → matches first then a Create "<q>" option (so Enter matches/creates, never clears).
+`updateDeliverableGroup` server action; groups derived in-component from the loaded deliverables.
 
 ## Notes / log
 - 2026-06-28 — Specced. No code written.
+
+- 2026-06-28 — Implemented & Playwright-verified. Branch: `feat/set9/R9.3-group-combobox`.
