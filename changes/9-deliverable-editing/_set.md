@@ -1,0 +1,68 @@
+# Revision Set 9 — Deliverable editing & organization
+
+Bootstrap: read `changes/CONTEXT.md` first for project invariants.
+This file is the index and roll-up log for set 9. Per-feature specs live in the sibling
+`R9.*` directories; load only the feature(s) you are working on.
+
+This set brings deliverables up to the same editing richness as subtasks (sets 6–8): a full **edit
+modal**, **check/✗ confirm microinteractions** on status + delete, an **inline group combobox**, an
+**expandable + inline-editable description** (Markdown/plain), a new editable **priority**, and
+**group filtering + within-group reordering** (default: priority, highest on top). All features center
+on `src/components/sortable-deliverables.tsx` + `src/lib/actions/deliverables.ts`.
+
+## Status
+<!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
+- [ ] R9.1 — Deliverable edit modal — convert the `/deliverables/[did]/edit` screen into a modal (mirrors R8.1's subtask modal); includes priority (R9.5) + group (R9.3)
+- [ ] R9.2 — Deliverable status + delete microinteractions — the inline deliverable **status** edit and the **delete** button use the same animated ✓/✗ `InlineConfirm` (CheckFat/XCircle) as the subtask status pill
+- [ ] R9.3 — Inline group combobox — edit a deliverable's group inline via a dropdown of existing groups, with type-to-create-new
+- [ ] R9.4 — Deliverable description expand + inline edit — clicking the deliverable body (not a control) shows its description; edit it inline (Markdown or plain) without a modal
+- [ ] R9.5 — Deliverable priority — new editable `priority` field, inline in the header and in the edit modal (**DB change**)
+- [ ] R9.6 — Group filter + within-group ordering — filter deliverables by group; reorder within a group; default sort is by priority (highest at top)
+
+## Sequencing & file overlap
+- Every feature touches `src/components/sortable-deliverables.tsx` and/or `deliverables.ts`, so they
+  are developed **sequentially on the set branch**, not fanned out to parallel agents.
+- **R9.5 (priority) lands early** — R9.1 (modal) and R9.6 (ordering) both consume it.
+- **R9.3 (groups)** lands before **R9.6** (group filter needs the group editing in place).
+- R9.2 (microinteractions) and R9.4 (description) are independent of the others.
+- Reuses primitives from sets 7–8: `InlineConfirm` (R7.2), the portal `useAnchorPos`/`AssigneeSearch`
+  pattern (R6.3/R7.1) for the group combobox, the Dialog (R8.1) for the modal, `MarkdownEditor` /
+  `react-markdown` for descriptions, and `deriveDeliverableStatus` stays authoritative for status.
+
+## Open questions / decisions before implementing
+1. **Branch base.** Set 9 builds on set-8 deliverable/subtask code (not in `main`; sets 6–8 await
+   merge). Recommendation: branch `feat/set9-deliverable-editing` off the **final** `feat/set8-…`
+   branch **after** the set-8 round-2 changes land and the user verifies set 8 is done. Merge order to
+   main: 6 → 7 → 8 → 9. Confirm.
+2. **Priority type (R9.5).** Recommendation: a Postgres enum **`Priority { LOW, MEDIUM, HIGH }`**
+   (default `MEDIUM`), sorting `HIGH > MEDIUM > LOW` (highest on top). Simple, user-friendly, and
+   orderable. Alternative: an integer rank. Confirm enum + levels.
+3. **Convert the deliverable CREATE page too? (R9.1).** The user said the "edit screen" → modal.
+   Recommendation: convert **both** create and edit into one `DeliverableModal` (consistent with the
+   R8.1 subtask modal; the existing "+ Add deliverable" / `/deliverables/new` page would be removed).
+   Confirm (alternative: modal for edit only, keep the create page).
+4. **Reorder mechanism (R9.6).** No drag-and-drop library is installed. Recommendation: **up/down
+   buttons** per deliverable that swap `orderIndex` with the neighbor in the same group (no new
+   dependency). Alternative: add `@dnd-kit` for drag. Confirm.
+5. **Default order vs manual order (R9.6).** "Default by priority, highest at top" + "edit the
+   ordering." Recommendation: within each group, sort by `orderIndex`; seed `orderIndex` from priority
+   so the default *is* priority order, and the up/down buttons rewrite `orderIndex`. Offer a "sort by
+   priority" reset. Confirm.
+
+## DB changes in this set
+**R9.5 — add `priority` to `Deliverable`** (apply via `scripts/apply-schema.ts`, per `CONTEXT.md`).
+Pending Q2 (enum vs int). If enum (recommended):
+
+```sql
+-- finalize after Q2
+CREATE TYPE "Priority" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+ALTER TABLE "Deliverable" ADD COLUMN "priority" "Priority" NOT NULL DEFAULT 'MEDIUM';
+```
+
+Also reconcile `prisma/schema.prisma` (`enum Priority` + `priority Priority @default(MEDIUM)` on
+`Deliverable`) and regenerate the client (restart the dev server — Turbopack caches the WASM bundle).
+No other DB changes (`description`, `group`, `orderIndex` already exist).
+
+## Log
+- 2026-06-28 — Set 9 scaffolded; R9.1–R9.6 specced. No code written. Gated on the user verifying Set 8
+  (incl. its round-2 changes) is done before building Set 9.

@@ -1,6 +1,6 @@
 # R8.1 — Subtask modal (create + whole-record edit)
 
-**Status:** tests passing
+**Status:** in progress (round 2 — review feedback)
 **Files:**
 - `src/components/ui/dialog.tsx` (new — shadcn Dialog)
 - `src/components/subtask-modal.tsx` (new)
@@ -78,3 +78,31 @@ No DB changes; reuses existing `createSubtask` / `updateSubtask` (minus their re
   project-page query (R8.2 reuses it). Updated all older e2e helpers to seed subtasks via the modal
   (`e2e/helpers.ts` `addSubtaskViaModal`); full subtask-surface suite (9 tests) green. Branch:
   `feat/set8/R8.1-subtask-modal`.
+
+## Review feedback — round 2 (2026-06-28)
+
+**Problem:** The modal's description field is a plain `<textarea>`. The user wants the subtask
+description to support **Markdown or plain** text (consistent with the rest of the app, which already
+ships `react-markdown` + `remark-gfm` and a `MarkdownEditor` component with an MD/Plain toggle).
+
+**Approach:**
+- Give the modal's **Description** field Markdown support with an MD/Plain toggle, reusing the existing
+  `MarkdownEditor` pattern (`src/components/markdown-editor.tsx` — `react-markdown` + `remark-gfm`,
+  `mode: "md" | "plain"`, live preview).
+- Caveat: `MarkdownEditor` is **uncontrolled** (it reads/writes via a `name`d field for `<form>`
+  submission), but `SubtaskModal` builds `FormData` **manually** from controlled state. Two clean
+  options — pick one when implementing:
+  1. Wrap the modal body in a `<form>` and let `MarkdownEditor name="description"` feed `FormData`
+     (submit via the form's `onSubmit` / a `requestSubmit()`), **or**
+  2. Add a small **controlled** markdown field (textarea + MD/Plain toggle + `ReactMarkdown` preview)
+     that writes to the modal's existing `description` state.
+  Recommendation: option 2 (keeps the modal's controlled-submit flow intact; factor the toggle+preview
+  into a tiny reusable piece shared with R8.2's renderer if convenient).
+- No DB change — `description` is already `String?`; "md or plain" is an editor/render concern. Plain
+  text renders fine through the Markdown renderer, so no per-record format flag is needed.
+
+**Round-2 tests:**
+- [ ] `pnpm build` / typecheck passes
+- [ ] Playwright: the modal description field offers an MD/Plain toggle; entering Markdown (e.g.
+      `**bold**`) and saving persists it; the expanded row (R8.2) renders it as Markdown
+- [ ] App: plain text still saves and displays unchanged

@@ -12,12 +12,12 @@ plus a new bulk project-delete for PMs).
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [t] R8.1 — Subtask modal — move subtask **creation** from a separate page into a modal, and offer the same modal to edit the whole subtask at once (title/description/assignee/due date/status); inline edits stay
-- [t] R8.2 — Expandable subtask description — clicking a subtask row expands it to show its description, pushing siblings down
+- [~] R8.1 — Subtask modal **[round 2: modal description supports Markdown/plain]**
+- [~] R8.2 — Expandable subtask description **[round 2: render description as Markdown; click anywhere on the row (not a control) toggles it]**
 - [t] R8.3 — Subtask due-date bounds & year — bound a subtask's due date by the deliverable's start/target dates; show the year in due-date labels when it isn't the current year
 - [t] R8.4 — Deliverable status re-derivation (bug) — adding/deleting a subtask must recompute the parent deliverable's derived status, not just status edits
 - [t] R8.5 — Bulk project delete — `MANAGE_PROJECTS` users can multi-select projects in the list and delete them together
-- [t] R8.6 — Status-update Prisma null constraint (bug) — `prisma.statusUpdate.create()` throws a null-constraint error on submit; diagnose the live-table drift and fix
+- [~] R8.6 — Status-update Prisma null constraint (bug) **[round 2: add a loading state to the submit button]**
 
 ## Sequencing & file overlap
 - **R8.1, R8.2, R8.3, R8.4** all touch the subtask surface (`src/components/sortable-deliverables.tsx`
@@ -69,3 +69,8 @@ the generated file imports no `lucide-react` (Lucide is banned — see `CONTEXT.
 - 2026-06-27 — All R8.1–R8.6 implemented, Playwright-verified, and merged into the set branch
   (`feat/set8-subtask-modal-bulk-fixes`). Full e2e suite (16 tests) green; `pnpm build` clean.
   Awaiting the user's final review before merging to `main` (order: set 6 → set 7 → set 8).
+- 2026-06-28 — User review reopened R8.1/R8.2/R8.6 with round-2 feedback (`[~]`): subtask description
+  Markdown/plain (R8.1 editor + R8.2 render), click-anywhere-on-row to expand (R8.2), and a
+  status-update submit loading state (R8.6). Specced only — implementation pending the user's go-ahead.
+  New deliverable-editing work moved to Set 9 (scaffolded, not built; gated on the user verifying
+  Set 8 is done first).

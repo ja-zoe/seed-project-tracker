@@ -1,6 +1,6 @@
 # R8.6 — Status-update Prisma null constraint (bug)
 
-**Status:** tests passing
+**Status:** in progress (round 2 — review feedback)
 **Files:**
 - DDL patch `fix.sql` (applied via `scripts/apply-schema.ts`) — no app-code change needed
 
@@ -80,3 +80,22 @@ column default flipped from `null` → `CURRENT_TIMESTAMP`. `submittedAt` (alrea
 - 2026-06-27 — Diagnosed via introspection script; root cause = `updatedAt` NOT NULL no-default.
   Applied `fix.sql` DDL patch via `scripts/apply-schema.ts`. Playwright end-to-end submit passes
   (row created, appears in history). Branch: `feat/set8/R8.6-status-null`.
+
+## Review feedback — round 2 (2026-06-28)
+
+**Problem (#10):** Submitting a project status update has **no loading state** — the plain
+`<button type="submit">Submit Update</button>` on `/projects/[id]/status/new` gives no feedback while
+the server action runs, so a user can double-click or wonder if it worked.
+
+**Approach:** Swap that button for the existing **`SubmitButton`** component
+(`src/components/submit-button.tsx`), which already uses `useFormStatus()` to disable itself and show
+a pending label while the enclosing `<form action=…>` is submitting. The status form is a server
+-component `<form action={handleSubmit}>`, so `useFormStatus` works without extra wiring:
+`<SubmitButton label="Submit Update" pendingLabel="Submitting…" />`. (Same pattern already used on the
+deliverable/subtask edit pages.)
+
+**Round-2 tests:**
+- [ ] `pnpm build` / typecheck passes
+- [ ] App/Playwright: on submit, the button shows the pending label and is disabled until the redirect;
+      a complete submission still creates the row and returns to the project (no regression vs the
+      round-1 fix)
