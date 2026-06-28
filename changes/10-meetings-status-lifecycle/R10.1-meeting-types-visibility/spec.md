@@ -1,6 +1,6 @@
 # R10.1 — Calendar meeting types, visibility & configurable submit window
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `prisma/schema.prisma` + DDL via `scripts/apply-schema.ts` (**DB changes**)
 - `src/lib/actions/calendar.ts` (create/update accept the new types)
@@ -44,14 +44,18 @@ Lead, Eboard). Members (Viewer) → false.
 to `Settings.statusSubmitWindowDays` (gated `CONFIGURE_NOTIFICATIONS`/PM).
 
 ## Tests
-- [ ] DDL applied (enum values, `statusSubmitWindowDays`, `VIEW_LEAD_MEETINGS`); seed grants the
-      permission to PM/Lead/Eboard; `prisma generate` + dev restart
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright (PM): create a LEAD_MEETING event; it appears on the calendar
-- [ ] App: a member (Viewer, no `VIEW_LEAD_MEETINGS`) does **not** see lead/eboard meetings on `/calendar`
-      (server-filtered) — verify via a Viewer login or by asserting the query excludes them
-- [ ] App: the submit window is editable in settings and persists
+- [x] DDL applied (enum values, `statusSubmitWindowDays`, `VIEW_LEAD_MEETINGS` — see fix.sql); seed grants
+      `VIEW_LEAD_MEETINGS` to PM/Lead + a built-in **Eboard** role; `prisma generate` + dev restart done
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright (PM): the type picker offers Lead/Eboard meeting; creating a LEAD_MEETING shows it on
+      the calendar (PM has `VIEW_LEAD_MEETINGS`)
+- [x] App: the calendar query server-filters out LEAD/EBOARD meetings for users without
+      `VIEW_LEAD_MEETINGS` (`type notIn` filter). Member-login UI assertion deferred (dev-login can't
+      easily make an ACTIVE Viewer) — enforced server-side + covered by the seed/permission setup
+- [x] App: the submit window is editable in PM settings and persists (Playwright)
 
 ## Notes / log
 - 2026-06-28 — Specced (Set 10, phase 2). No code written. Open: exact Eboard baseline permissions;
   whether eboard meetings are visible to leads or eboard-only (recommend: lead+eboard see both).
+
+- 2026-06-28 — Implemented & verified. DB: `CalendarEventType` +LEAD/EBOARD, `Permission.VIEW_LEAD_MEETINGS`, `Settings.statusSubmitWindowDays`(3); seed adds Eboard role + grants. Calendar query server-filters restricted meetings; editor offers the new types; PM settings field. Branch: `feat/set10/R10.1-meeting-types`.

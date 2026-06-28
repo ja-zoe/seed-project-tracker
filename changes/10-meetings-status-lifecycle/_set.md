@@ -15,7 +15,7 @@ meeting types with role-based visibility, makes the status-submit window configu
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [ ] R10.1 — Calendar meeting types & visibility — add **LEAD_MEETING** + **EBOARD_MEETING** calendar
+- [t] R10.1 — Calendar meeting types & visibility — add **LEAD_MEETING** + **EBOARD_MEETING** calendar
       event types; only leads + eboard can see lead/eboard meetings; make the status-submit window
       (default 3 days before a lead meeting) **configurable** in Settings (**DB change**)
 - [ ] R10.2 — Status-update lifecycle — each status update links to a **lead meeting**; the "Submit
