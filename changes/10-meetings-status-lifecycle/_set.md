@@ -18,7 +18,7 @@ meeting types with role-based visibility, makes the status-submit window configu
 - [t] R10.1 — Calendar meeting types & visibility — add **LEAD_MEETING** + **EBOARD_MEETING** calendar
       event types; only leads + eboard can see lead/eboard meetings; make the status-submit window
       (default 3 days before a lead meeting) **configurable** in Settings (**DB change**)
-- [ ] R10.2 — Status-update lifecycle — each status update links to a **lead meeting**; the "Submit
+- [t] R10.2 — Status-update lifecycle — each status update links to a **lead meeting**; the "Submit
       Update" button only appears within the configurable window before that meeting; leads can
       **edit/delete** their own update **before** the meeting/due time; late submissions are allowed but
       **marked late**; after due, leads can't edit; users with the right permission can **edit/delete**
