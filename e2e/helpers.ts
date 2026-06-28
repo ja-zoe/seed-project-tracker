@@ -32,10 +32,10 @@ export async function createDeliverable(
   await page.getByRole("button", { name: "Add Deliverable" }).click();
   await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
   await page.waitForLoadState("networkidle");
-  const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
-  await expect(editLink).toBeVisible({ timeout: 10_000 });
-  const id = (await editLink.getAttribute("href"))?.match(/deliverables\/([^/]+)\/edit/)?.[1];
-  if (!id) throw new Error("could not extract deliverable id");
+  const card = page.locator("[data-deliverable-id]", { hasText: title }).first();
+  await expect(card).toBeVisible({ timeout: 10_000 });
+  const id = await card.getAttribute("data-deliverable-id");
+  if (!id) throw new Error("could not read deliverable id");
   return id;
 }
 

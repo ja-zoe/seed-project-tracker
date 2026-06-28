@@ -39,9 +39,9 @@ async function setup(page: Page): Promise<{ projectUrl: string; deliverableId: s
   await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
   await page.waitForLoadState("networkidle");
 
-  const editLink = page.locator('a[href*="/deliverables/"][href*="/edit"]').first();
-  await expect(editLink).toBeVisible({ timeout: 10_000 });
-  const deliverableId = (await editLink.getAttribute("href"))?.match(/deliverables\/([^/]+)\/edit/)?.[1];
+  const card = page.locator("[data-deliverable-id]").first();
+  await expect(card).toBeVisible({ timeout: 10_000 });
+  const deliverableId = await card.getAttribute("data-deliverable-id");
   if (!deliverableId) throw new Error("no deliverable id");
 
   await addSubtask(page, projectUrl, deliverableId, "First subtask");
