@@ -74,3 +74,8 @@ the generated file imports no `lucide-react` (Lucide is banned — see `CONTEXT.
   status-update submit loading state (R8.6). Specced only — implementation pending the user's go-ahead.
   New deliverable-editing work moved to Set 9 (scaffolded, not built; gated on the user verifying
   Set 8 is done first).
+- 2026-06-28 — Round-2 changes implemented & Playwright-verified, each merged into the set branch:
+  R8.2-r2 (shared `MarkdownView`, click-row-to-expand), R8.1-r2 (controllable `MarkdownEditor` in the
+  modal), R8.6-r2 (`SubmitButton` loading state). All R8.* back to `[t]`. Full e2e suite (19 tests)
+  green; `pnpm build` clean. **Awaiting the user's validation of Set 8 before merging to `main`**
+  (order 6 → 7 → 8), and before building Set 9.
