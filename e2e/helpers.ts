@@ -62,15 +62,17 @@ export async function addSelfAsLead(page: Page, projectUrl: string) {
   await page.waitForLoadState("networkidle");
 }
 
-/** Create a LEAD_MEETING calendar event for a project (so status updates can be submitted). */
-export async function createLeadMeeting(page: Page, projectLabel: string, title: string, startsAtLocal: string) {
-  await page.goto("/calendar");
+/**
+ * Create a global LEAD_MEETING calendar event in a given semester. Lead meetings are
+ * semester-wide (not per-project), so any project in that semester can submit for it.
+ */
+export async function createLeadMeeting(page: Page, title: string, startsAtLocal: string, semester = "Test 2026") {
+  await page.goto(`/calendar?semester=${encodeURIComponent(semester)}`);
   await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Add event" }).first().click();
   await page.locator('input[name="title"]').fill(title);
   await page.locator('select[name="type"]').selectOption("LEAD_MEETING");
   await page.locator('input[name="startsAt"]').fill(startsAtLocal);
-  await page.locator('select[name="projectId"]').selectOption({ label: projectLabel });
   await page.getByRole("button", { name: "Add Event", exact: true }).click();
   await page.waitForTimeout(400);
 }

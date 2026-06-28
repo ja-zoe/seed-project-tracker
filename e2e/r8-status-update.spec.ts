@@ -19,16 +19,17 @@ test.describe("R8.6 — status update submission (Prisma null constraint fix)", 
   test("submitting a status update creates a row and redirects (no Prisma null-constraint crash)", async ({ page }) => {
     await login(page);
 
+    const semester = `Test ${Date.now()}`;
     const name = `R8.6 ${Date.now()}`;
-    const projectUrl = await createProject(page, name);
+    const projectUrl = await createProject(page, name, semester);
     await addSelfAsLead(page, projectUrl);
     // A lead meeting (in the submit window) is required to submit (R10.2)
-    await createLeadMeeting(page, E2E_MARKER + name, E2E_MARKER + "R8.6 lead mtg", dtLocal(86_400_000));
+    await createLeadMeeting(page, E2E_MARKER + "R8.6 lead mtg", dtLocal(86_400_000), semester);
 
     // Navigate to the submit form via the project page's "Submit Update" button
     await page.goto(projectUrl);
     await page.waitForLoadState("networkidle");
-    await page.getByRole("link", { name: "Submit Update" }).click();
+    await page.getByRole("link", { name: "Submit Project Standing" }).click();
     await page.waitForLoadState("networkidle");
     await expect(page.locator('textarea[name="plannedWork"]')).toBeVisible({ timeout: 10_000 });
     await page.fill('textarea[name="plannedWork"]', "Planned: build the thing");
@@ -37,7 +38,7 @@ test.describe("R8.6 — status update submission (Prisma null constraint fix)", 
     await page.fill('textarea[name="nextWeekGoals"]', "Finish the thing");
     await shot(page, "r8-status-form-filled");
 
-    await page.getByRole("button", { name: "Submit Update" }).click();
+    await page.getByRole("button", { name: "Submit Project Standing" }).click();
 
     // Should redirect back to the project page — NOT show a Prisma error
     await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });

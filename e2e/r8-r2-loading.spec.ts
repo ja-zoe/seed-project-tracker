@@ -18,23 +18,24 @@ test.describe("R8.6 round-2 — status-update submit loading state", () => {
 
   test("the Submit Update button shows a pending state and disables while submitting", async ({ page }) => {
     await login(page);
+    const semester = `Test ${Date.now()}`;
     const name = `R8.6r2 ${Date.now()}`;
-    const projectUrl = await createProject(page, name);
+    const projectUrl = await createProject(page, name, semester);
     await addSelfAsLead(page, projectUrl);
     // A lead meeting (in the submit window) is required to submit (R10.2)
-    await createLeadMeeting(page, E2E_MARKER + name, E2E_MARKER + "R8.6r2 lead mtg", dtLocal(86_400_000));
+    await createLeadMeeting(page, E2E_MARKER + "R8.6r2 lead mtg", dtLocal(86_400_000), semester);
 
     // Open the status form
     await page.goto(projectUrl);
     await page.waitForLoadState("networkidle");
-    await page.getByRole("link", { name: "Submit Update" }).click();
+    await page.getByRole("link", { name: "Submit Project Standing" }).click();
     await page.waitForLoadState("networkidle");
     await page.fill('textarea[name="plannedWork"]', "Planned");
     await page.fill('textarea[name="actualProgress"]', "Actual");
     await page.fill('textarea[name="blockers"]', "None");
     await page.fill('textarea[name="nextWeekGoals"]', "Next");
 
-    const submit = page.getByRole("button", { name: "Submit Update" });
+    const submit = page.getByRole("button", { name: "Submit Project Standing" });
     await expect(submit).toBeVisible();
 
     // Delay only the first server-action POST so the pending state is observable

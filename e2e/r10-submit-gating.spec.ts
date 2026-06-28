@@ -4,12 +4,13 @@ import { login, createProject, addSelfAsLead, createLeadMeeting, dtLocal, E2E_MA
 test.describe("R10.2 — submit-button gating (dashboard + project page)", () => {
   test("Submit shows only within the window AND not yet submitted", async ({ page }) => {
     await login(page);
+    const semester = `Test ${Date.now()}`;
     const name = `R10.2 gating ${Date.now()}`;
-    const projectUrl = await createProject(page, name);
+    const projectUrl = await createProject(page, name, semester);
     await addSelfAsLead(page, projectUrl);
 
     const dashSubmit = () => page.locator(`a[href="${projectUrl}/status/new"]`);
-    const pageSubmit = () => page.getByRole("link", { name: "Submit Update" });
+    const pageSubmit = () => page.getByRole("link", { name: "Submit Project Standing" });
 
     // ── No lead meeting → Submit hidden on the dashboard AND the project page ──
     await page.goto("/dashboard");
@@ -19,10 +20,10 @@ test.describe("R10.2 — submit-button gating (dashboard + project page)", () =>
     await page.waitForLoadState("networkidle");
     await expect(pageSubmit()).toHaveCount(0);
     // history link is always present
-    await expect(page.getByRole("link", { name: "Submission history" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Project Standing History" })).toBeVisible();
 
     // ── Lead meeting in window → Submit shows on both ─────────────────────────
-    await createLeadMeeting(page, E2E_MARKER + name, E2E_MARKER + "gating mtg", dtLocal(86_400_000));
+    await createLeadMeeting(page, E2E_MARKER + "gating mtg", dtLocal(86_400_000), semester);
     await page.goto("/dashboard");
     await page.waitForLoadState("networkidle");
     await expect(dashSubmit()).toHaveCount(1);
@@ -36,7 +37,7 @@ test.describe("R10.2 — submit-button gating (dashboard + project page)", () =>
     await page.fill('textarea[name="actualProgress"]', "A");
     await page.fill('textarea[name="blockers"]', "None");
     await page.fill('textarea[name="nextWeekGoals"]', "G");
-    await page.getByRole("button", { name: "Submit Update" }).click();
+    await page.getByRole("button", { name: "Submit Project Standing" }).click();
     await page.waitForURL((url) => url.pathname === projectUrl, { timeout: 15_000 });
 
     await expect(pageSubmit()).toHaveCount(0); // project page
