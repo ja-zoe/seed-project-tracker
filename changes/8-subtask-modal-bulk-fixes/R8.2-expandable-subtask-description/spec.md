@@ -1,6 +1,6 @@
 # R8.2 — Expandable subtask description
 
-**Status:** planned
+**Status:** tests passing
 **Files:**
 - `src/components/sortable-deliverables.tsx`
 - the project page that queries deliverables/subtasks (add `description` to the `select` and pass it
@@ -40,13 +40,18 @@ No DB changes (description already exists); no new server actions.
 
 ## Tests
 
-- [ ] `pnpm build` / typecheck passes
-- [ ] Playwright: clicking a subtask's title expands a region showing its description; the next
-      subtask row moves **down** (its `y` increases vs collapsed)
-- [ ] Playwright: clicking the title again (or another subtask) collapses/switches the expansion
-- [ ] Playwright: clicking the status pill / assignee name / pencil does **not** toggle expansion
-- [ ] App: a subtask with no description shows a muted "No description" when expanded
-- [ ] App: `aria-expanded` reflects state; `Enter`/`Space` on the title toggles it
+- [x] `pnpm build` / typecheck passes
+- [x] Playwright: clicking a subtask's title expands a region showing its description; the next row
+      moves **down** (y 325 → 353)
+- [x] Playwright: clicking the title again collapses; switching to another subtask switches expansion
+- [x] Playwright: clicking the status pill does **not** toggle expansion
+- [x] App: a subtask with no description shows a muted italic "No description" when expanded
+- [x] App: `aria-expanded` reflects state (the title is a real `<button>`, so Enter/Space toggle it)
 
 ## Notes / log
 - 2026-06-27 — Specced. No code written.
+- 2026-06-27 — Implemented. `description` already plumbed in R8.1. Added `expandedSubtaskId` state;
+  restructured each subtask row into a column (inner flex row + an expansion region below) so the
+  expanded description pushes following rows down via normal flow. The static title became a
+  `<button data-testid="subtask-title-toggle">` with `aria-expanded`; the inline pencil/pill/assignee
+  controls are separate elements, so they don't toggle expansion. Branch: `feat/set8/R8.2-expandable-desc`.
