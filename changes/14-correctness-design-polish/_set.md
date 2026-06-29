@@ -11,7 +11,7 @@ architecture-consistent way.
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [t] R14.1 — Date-only fields render one day early in negative-UTC timezones (deadline / dueDate /
+- [x] R14.1 — Date-only fields render one day early in negative-UTC timezones (deadline / dueDate /
       targetDate / startDate / meeting-record date) — format date-only values in UTC
 - [ ] R14.2 — Design-system drift: heavy shadows (`shadow-md/lg`) + dialog `backdrop-blur` glassmorphism
       violate the documented "no heavy shadows / no glassmorphism" rule — conform to flat border elevation
