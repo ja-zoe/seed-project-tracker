@@ -48,3 +48,11 @@ None. Confirmed with the user 2026-06-28:
 - 2026-06-28 — Set 12 outlined & scaffolded after the user reported the calendar/lead-meeting bug.
   Both defects reproduced against live data. User confirmed: configurable late window + single-page
   switcher + nearest-today semester default. Branch `feat/set12-calendar-pending-fixes`.
+- 2026-06-28 — R12.1 implemented, verified (script + e2e `r12-calendar-default`), merged to the set branch.
+- 2026-06-28 — **Stacked Set 12 on Set 11.** The shared dev DB already had Set 11's `MANAGE_MEETING_RECORDS`
+  enum (applied + seeded), so Set-12-off-`main` crashed in `getUserPermissions`. Merged
+  `feat/set11-meeting-delete-mcp` into the set branch so schema/client match the DB → **Set 11 and Set 12
+  must merge to `main` together, in order (11 then 12).**
+- 2026-06-28 — R12.2 implemented, verified (e2e `r12-pending-status` + `r12-late-window-setting` + a
+  boundary script), merged to the set branch. Both features `[x]`. Final integration `pnpm build` clean.
+  **Awaiting user approval to merge to `main` (Set 11 then Set 12).**
