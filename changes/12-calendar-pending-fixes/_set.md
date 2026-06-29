@@ -24,7 +24,7 @@ UX the second defect implies:
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
 - [x] R12.1 — Calendar opens on the correct semester (and month) — default to the semester whose
       events are nearest **today**, not a lexicographic sort
-- [t] R12.2 — Multiple pending project standings — pending-set model + configurable late window
+- [x] R12.2 — Multiple pending project standings — pending-set model + configurable late window
       (**DB change**) + "You have N Project Standing Updates to submit" + single-page date-labeled switcher
 
 ## Sequencing & file overlap
