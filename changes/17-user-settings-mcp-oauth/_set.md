@@ -15,8 +15,8 @@ This file is the index and roll-up log for set 17. Per-feature specs live in the
 - [ ] R17.1 — Self-service user settings page — any user can edit firstName / lastName / nickname
       (email is read-only CAS identity); lives on the existing `/account` page
 - [ ] R17.2 — MCP OAuth 2.1 support so ChatGPT (web) can connect — make `/api/mcp` an OAuth-protected
-      resource (via a **managed provider**) alongside the existing static-token path (**large,
-      security-sensitive; no DB change; provider + deploy needed — review the spec before building**)
+      resource via **Stytch Connected Apps** (keeps CAS login) alongside the static-token path (**large,
+      security-sensitive; no DB change; needs a Stytch project + public HTTPS deploy — both user-provided**)
 
 ## Sequencing & file overlap
 - Independent. R17.1: `account` page + `profile.ts`. R17.2: `api/mcp` + new auth routes/metadata.
@@ -24,10 +24,10 @@ This file is the index and roll-up log for set 17. Per-feature specs live in the
   decision — do R17.1 first.
 
 ## Open questions / decisions before implementing
-1. **R17.2 — OAuth Authorization Server.** **RESOLVED 2026-06-29 (user): managed provider**, not self-host
-   (avoid owning OAuth/token crypto). Remaining sub-choice — *which* provider — defaults in the spec to a
-   **"OAuth-provider-for-AI-agents" product (Stytch Connected Apps or WorkOS AuthKit)**; the user confirms
-   the specific vendor at the pre-implementation review (it requires creating an account + API keys).
+1. **R17.2 — OAuth Authorization Server.** **RESOLVED 2026-06-29 (user): managed provider → Stytch Connected
+   Apps.** Keeps CAS as the login; Stytch supplies the AS mechanics. (Considered WorkOS = equivalent
+   fallback; Supabase OAuth Server rejected — ties identity to Supabase Auth, app is CAS-based.) User
+   prerequisites before build: create the Stytch project + keys, and deploy to public HTTPS.
 2. **R17.2 — keep the static-token path?** **RESOLVED: yes, dual-auth** — keep `Authorization: Bearer
    <mcpToken>` for local clients (Claude Code/Cursor/Codex) and add OAuth for ChatGPT/remote. No regression.
 3. **R17.2 — deployment reality.** ChatGPT can only connect to a **public HTTPS** server, not `localhost`.
