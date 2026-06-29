@@ -17,7 +17,7 @@ users **edit a project member's role**.
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
 - [ ] R13.1 — Catch-all error & not-found pages — `global-error.tsx` + in-app `error.tsx` + `not-found.tsx`
-- [ ] R13.2 — Fix missing `SUBLEAD` enum value in the DB (**DB change**) — adding a sub-lead currently throws
+- [x] R13.2 — Fix missing `SUBLEAD` enum value in the DB (**DB change**) — adding a sub-lead currently throws
 - [ ] R13.3 — Action-item create/edit in a **modal** (remove the separate edit page + inline create form)
 - [ ] R13.4 — Action-item **inline per-field edits** with `InlineConfirm` microinteractions
 - [ ] R13.5 — **Edit a project member's role** (permission-gated)
@@ -30,19 +30,11 @@ users **edit a project member's role**.
 - R13.1 is independent of everything.
 
 ## Open questions / decisions before implementing
-1. **Member-role-edit permission (R13.5).** The members page is already gated by `MANAGE_PROJECTS`
-   (add/remove members). Recommendation: gate role-editing by the **same `MANAGE_PROJECTS`** — no new
-   permission. Confirm.
-2. **Action-item modal reach (R13.3).** Besides the project page, the global `/action-items` list page
-   currently only closes/reopens items. Recommendation: wire the **same modal** there for editing too, so
-   there's one edit path. Confirm (or keep the modal project-page-only for now).
-3. **Inline vs modal division (R13.3 + R13.4).** Recommendation, mirroring deliverables/subtasks: the
-   **modal** handles *create* and *full multi-field edit*; **inline edits** handle quick single-field
-   tweaks (description / owner / deadline) on a row with a ✓/✗ `InlineConfirm`. Confirm this is the
-   intended "both."
-4. **Member-role control style (R13.5).** Recommendation: an inline role control with the same
-   `InlineConfirm` ✓/✗ microinteraction (consistent with R13.4), not a bare auto-submitting `<select>`.
-   Confirm.
+**All resolved 2026-06-29 — user approved the recommended answers:**
+1. Member-role-edit gated by **`MANAGE_PROJECTS`** (no new permission).
+2. Action-item modal **also wired into the global `/action-items` list** for editing (one edit path).
+3. **Modal = create + full edit; inline ✓/✗ = quick single-field edits** (description / owner / deadline).
+4. Member-role control = **inline with the `InlineConfirm` ✓/✗ microinteraction** (consistent with R13.4).
 
 ## DB changes in this set
 - `ProjectMemberRole` enum: the Prisma schema already declares `LEAD | SUBLEAD | MEMBER`, but the **live
