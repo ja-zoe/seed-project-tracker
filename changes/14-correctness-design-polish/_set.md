@@ -43,3 +43,7 @@ None. Both features are presentation-only (no schema, no DDL).
 ## Log
 - 2026-06-29 — Set 14 scaffolded from a cycle-1 audit. `main` confirmed healthy (targeted specs pass);
   full-suite marathon flagged as an environment constraint. Branch `feat/set14-correctness-design-polish`.
+- 2026-06-29 — R14.1 (date-only UTC) implemented, verified (e2e `r14-date-utc`), merged to the set branch.
+- 2026-06-29 — R14.2 (remove heavy shadows + glassmorphism) implemented via the frontend-design skill,
+  verified (e2e `r14-design-shots` + screenshots + modal/menu regression), merged to the set branch.
+  Both features `[x]`. **Set branch only — NOT merged to `main` (per the autonomous-run fence).**
