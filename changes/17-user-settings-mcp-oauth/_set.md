@@ -45,8 +45,6 @@ This file is the index and roll-up log for set 17. Per-feature specs live in the
 - 2026-06-29 — Set 17 scaffolded. R17.1 (settings) is decision-complete and small. R17.2 (MCP OAuth)
   researched against ChatGPT's current connector requirements; spec written with an approach decision left
   for the user. Branch `feat/set17-user-settings-mcp-oauth`.
-
-## Log
 - 2026-06-29 — R17.1 implemented + verified (e2e `r17-user-settings`), merged to the set branch.
 - 2026-06-29 — R17.2 implemented in phases: Phase A (resource server) + Phase B core (RS256 keypair, JWKS,
   trusted-token signer) verified locally; consent page (`/oauth/authorize`, Stytch IdentityProvider) built,
