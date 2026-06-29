@@ -30,3 +30,6 @@ None.
 
 ## Log
 - 2026-06-29 — Set 15 scaffolded from a cycle-2 RBAC audit. Branch `feat/set15-rbac-correctness`.
+- 2026-06-29 — R15.1 implemented + verified (e2e `r15-role-permissions`), merged to the set branch.
+- 2026-06-29 — Set 15 complete. Merged `feat/set15-rbac-correctness` into `main` (user-approved), right
+  after Set 14. Integrated `main` builds clean.
