@@ -20,7 +20,7 @@ users **edit a project member's role**.
 - [x] R13.2 — Fix missing `SUBLEAD` enum value in the DB (**DB change**) — adding a sub-lead currently throws
 - [x] R13.3 — Action-item create/edit in a **modal** (remove the separate edit page + inline create form)
 - [x] R13.4 — Action-item **inline per-field edits** with `InlineConfirm` microinteractions
-- [ ] R13.5 — **Edit a project member's role** (permission-gated)
+- [t] R13.5 — **Edit a project member's role** (permission-gated)
 
 ## Sequencing & file overlap
 - **R13.2 before R13.5** — editing a member's role to "Sub-lead" only works once the DB enum has `SUBLEAD`.
