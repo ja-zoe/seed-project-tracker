@@ -19,7 +19,7 @@ users **edit a project member's role**.
 - [x] R13.1 — Catch-all error & not-found pages — `global-error.tsx` + in-app `error.tsx` + `not-found.tsx`
 - [x] R13.2 — Fix missing `SUBLEAD` enum value in the DB (**DB change**) — adding a sub-lead currently throws
 - [x] R13.3 — Action-item create/edit in a **modal** (remove the separate edit page + inline create form)
-- [ ] R13.4 — Action-item **inline per-field edits** with `InlineConfirm` microinteractions
+- [t] R13.4 — Action-item **inline per-field edits** with `InlineConfirm` microinteractions
 - [ ] R13.5 — **Edit a project member's role** (permission-gated)
 
 ## Sequencing & file overlap
