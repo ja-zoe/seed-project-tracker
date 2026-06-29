@@ -52,3 +52,8 @@ This file is the index and roll-up log for set 17. Per-feature specs live in the
   `STYTCH_*`, `STYTCH_TRUSTED_TOKEN_PROFILE_ID`, `MCP_OAUTH_PRIVATE_KEY`.
 - 2026-06-29 — Set 17 merged to `main` (user-directed) so R17.2's live OAuth round-trip can be verified on
   the deploy. R17.1 done; R17.2 `[~]` pending the ChatGPT end-to-end check (the only remaining gate).
+- 2026-06-29 — R17.2 live-deploy debugging (direct hotfixes to `main`): (1) middleware now treats
+  `/api/mcp` + `/.well-known/*` as public — Vercel had redirected them to CAS, breaking ChatGPT OAuth
+  discovery (commit 8628490); (2) `/oauth/authorize` now names any missing Stytch env var to self-diagnose
+  a misconfigured deploy (commit 0ad7400). ChatGPT connects + reaches CAS sign-in; remaining gate is a
+  missing Vercel env var + the live consent round-trip. R17.2 still `[~]`.
