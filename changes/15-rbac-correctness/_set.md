@@ -9,7 +9,7 @@ unmerged Set 14 — disjoint files, no DB dependency). No Open Questions.
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [ ] R15.1 — Role Builder silently strips 4 permissions on any role edit — add the missing permission
+- [t] R15.1 — Role Builder silently strips 4 permissions on any role edit — add the missing permission
       checkboxes so editing a role preserves the full permission set
 
 ## Sequencing & file overlap
