@@ -12,7 +12,7 @@ This file is the index and roll-up log for set 17. Per-feature specs live in the
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [t] R17.1 — Self-service user settings page — any user can edit firstName / lastName / nickname
+- [x] R17.1 — Self-service user settings page — any user can edit firstName / lastName / nickname
       (email is read-only CAS identity); lives on the existing `/account` page
 - [ ] R17.2 — MCP OAuth 2.1 support so ChatGPT (web) can connect — make `/api/mcp` an OAuth-protected
       resource via **Stytch Connected Apps** (keeps CAS login) alongside the static-token path (**large,
