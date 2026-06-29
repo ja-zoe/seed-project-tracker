@@ -15,8 +15,9 @@ This file is the index and roll-up log for set 17. Per-feature specs live in the
 - [x] R17.1 — Self-service user settings page — any user can edit firstName / lastName / nickname
       (email is read-only CAS identity); lives on the existing `/account` page
 - [~] R17.2 — MCP OAuth 2.1 support so ChatGPT (web) can connect — make `/api/mcp` an OAuth-protected
-      resource via **Stytch Connected Apps** (keeps CAS login) alongside the static-token path (**large,
-      security-sensitive; no DB change; needs a Stytch project + public HTTPS deploy — both user-provided**)
+      resource via **Stytch Connected Apps** (keeps CAS login) alongside the static-token path.
+      **Code complete + builds/boots + all locally-verifiable checks pass; merged to `main` so the
+      deploy-only checks (live OAuth round-trip in ChatGPT) can be done. Stays `[~]` until that passes.**
 
 ## Sequencing & file overlap
 - Independent. R17.1: `account` page + `profile.ts`. R17.2: `api/mcp` + new auth routes/metadata.
@@ -44,3 +45,12 @@ This file is the index and roll-up log for set 17. Per-feature specs live in the
 - 2026-06-29 — Set 17 scaffolded. R17.1 (settings) is decision-complete and small. R17.2 (MCP OAuth)
   researched against ChatGPT's current connector requirements; spec written with an approach decision left
   for the user. Branch `feat/set17-user-settings-mcp-oauth`.
+
+## Log
+- 2026-06-29 — R17.1 implemented + verified (e2e `r17-user-settings`), merged to the set branch.
+- 2026-06-29 — R17.2 implemented in phases: Phase A (resource server) + Phase B core (RS256 keypair, JWKS,
+  trusted-token signer) verified locally; consent page (`/oauth/authorize`, Stytch IdentityProvider) built,
+  build clean, CAS-gated (307). New deps: `stytch`, `@stytch/nextjs`, `@stytch/vanilla-js`, `jose`. New env:
+  `STYTCH_*`, `STYTCH_TRUSTED_TOKEN_PROFILE_ID`, `MCP_OAUTH_PRIVATE_KEY`.
+- 2026-06-29 — Set 17 merged to `main` (user-directed) so R17.2's live OAuth round-trip can be verified on
+  the deploy. R17.1 done; R17.2 `[~]` pending the ChatGPT end-to-end check (the only remaining gate).
