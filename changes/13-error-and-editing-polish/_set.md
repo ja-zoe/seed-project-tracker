@@ -16,7 +16,7 @@ users **edit a project member's role**.
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [ ] R13.1 — Catch-all error & not-found pages — `global-error.tsx` + in-app `error.tsx` + `not-found.tsx`
+- [t] R13.1 — Catch-all error & not-found pages — `global-error.tsx` + in-app `error.tsx` + `not-found.tsx`
 - [x] R13.2 — Fix missing `SUBLEAD` enum value in the DB (**DB change**) — adding a sub-lead currently throws
 - [ ] R13.3 — Action-item create/edit in a **modal** (remove the separate edit page + inline create form)
 - [ ] R13.4 — Action-item **inline per-field edits** with `InlineConfirm` microinteractions
