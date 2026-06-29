@@ -48,3 +48,15 @@ users **edit a project member's role**.
 - 2026-06-28 — Set 13 scaffolded (specs only). Verified the `SUBLEAD` DB-enum gap and the absence of any
   error/not-found pages. Branch `feat/set13-error-and-editing-polish`. No code yet — awaiting review of the
   specs + Open Questions.
+- 2026-06-29 — User approved the recommended answers; implemented all five features (R13.1–R13.5), each on
+  its own branch, verified, and merged into the set branch:
+  - R13.2 — DB-only `SUBLEAD` enum fix (verified the failing `assignMember` upsert path).
+  - R13.1 — `global-error` + in-shell `error`/`not-found` + global `not-found` (e2e `r13-not-found`).
+  - R13.3 — action-item create/edit modal; removed the separate edit route + inline form; wired the global
+    list; `updateActionItem` no longer redirects (e2e `r13-action-item-modal`).
+  - R13.4 — action-item inline per-field edits with `InlineConfirm`; fixed a deadline UTC off-by-one
+    (e2e `r13-action-item-inline`).
+  - R13.5 — inline edit of a member's project role (e2e `r13-member-role`, also re-proves R13.2).
+  Final integration on the set branch: `pnpm build` clean + all 5 R13 e2e specs pass + app boots.
+  **Awaiting user approval to merge `feat/set13-error-and-editing-polish` into `main`** (off `main`, which
+  already has Sets 11–12 — clean, no stacking needed since R13's only DDL was the additive `SUBLEAD` value).
