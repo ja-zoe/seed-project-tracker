@@ -41,4 +41,6 @@ None. Confirmed with the user 2026-06-28:
   branch. DB: `Permission.MANAGE_MEETING_RECORDS` applied + seeded to PM.
 - 2026-06-28 — R11.2 implemented, verified by curl (PM + Viewer-role member tokens), merged to the set
   branch. Both features `[x]`. Final integration check on the set branch passes: `pnpm build` clean +
-  e2e green + app boots. **Awaiting user approval to merge `feat/set11-meeting-delete-mcp` into `main`.**
+  e2e green + app boots.
+- 2026-06-28 — Set 11 complete. Merged `feat/set11-meeting-delete-mcp` into `main` (merge commit d431765),
+  immediately followed by Set 12 (which was stacked on it).

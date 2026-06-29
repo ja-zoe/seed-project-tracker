@@ -55,4 +55,5 @@ None. Confirmed with the user 2026-06-28:
   must merge to `main` together, in order (11 then 12).**
 - 2026-06-28 — R12.2 implemented, verified (e2e `r12-pending-status` + `r12-late-window-setting` + a
   boundary script), merged to the set branch. Both features `[x]`. Final integration `pnpm build` clean.
-  **Awaiting user approval to merge to `main` (Set 11 then Set 12).**
+- 2026-06-28 — Set 12 complete. Merged `feat/set12-calendar-pending-fixes` into `main` (merge commit
+  f093cfa), right after Set 11. `main` builds clean with both sets. Set 12 done.
