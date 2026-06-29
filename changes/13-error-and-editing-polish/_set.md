@@ -58,5 +58,6 @@ users **edit a project member's role**.
     (e2e `r13-action-item-inline`).
   - R13.5 — inline edit of a member's project role (e2e `r13-member-role`, also re-proves R13.2).
   Final integration on the set branch: `pnpm build` clean + all 5 R13 e2e specs pass + app boots.
-  **Awaiting user approval to merge `feat/set13-error-and-editing-polish` into `main`** (off `main`, which
-  already has Sets 11–12 — clean, no stacking needed since R13's only DDL was the additive `SUBLEAD` value).
+- 2026-06-29 — Set 13 complete. Merged `feat/set13-error-and-editing-polish` into `main` and pushed to
+  `origin/main`. `main` builds clean. (Off `main`, which already had Sets 11–12 — clean merge, no stacking
+  needed since R13's only DDL was the additive `SUBLEAD` value.)
