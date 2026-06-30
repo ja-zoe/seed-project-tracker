@@ -13,7 +13,7 @@ This file is the index and roll-up log for set 18. Per-feature specs live in the
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
 - [~] R18.1 — MCP connection status on the account page — show whether the user has a live MCP
       connection and its type (personal access token vs OAuth/ChatGPT), via last-used tracking
-- [ ] R18.2 — Delete active users — new `DELETE_USERS` permission + a PM UI control with the
+- [~] R18.2 — Delete active users — new `DELETE_USERS` permission + a PM UI control with the
       shared inline-confirm microinteraction
 - [ ] R18.3 — Action-item deletion in the UI — inline (row) and from the modal, both using the
       shared `InlineConfirm` microinteraction
