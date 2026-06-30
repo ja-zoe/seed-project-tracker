@@ -16,7 +16,7 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
       clickable element; pointer cursor + color shift for clickable icons), built on the Forest Floor tokens
 - [x] R19.2 — Site-wide rollout + audit — apply the convention to every interactive surface (deliverables,
       inline-editable items, subtasks, icon buttons, lists, calendar, modals…), verified with Playwright
-- [ ] R19.3 — Audit completion + tuning (set REOPENED 2026-06-30) — R19.2's audit was not exhaustive: the
+- [t] R19.3 — Audit completion + tuning (set REOPENED 2026-06-30) — R19.2's audit was not exhaustive: the
       **Users & Roles page (`/pm/users`)** controls still have no hover cue, the **inline status pill** has
       no pointer cursor, and the **deliverable row hover tint is too strong**. Finish the audit so EVERY
       clickable element in EVERY view carries the cue, soften the row tint, and back it with a Playwright
