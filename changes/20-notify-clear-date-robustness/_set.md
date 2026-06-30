@@ -10,9 +10,9 @@ load only the feature(s) you are working on.
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [t] R20.1 — Clear notifications — a "Clear all" control (and per-item dismiss) in the notification bell,
+- [x] R20.1 — Clear notifications — a "Clear all" control (and per-item dismiss) in the notification bell,
       backed by a delete endpoint/action
-- [ ] R20.2 — Date-input robustness — an impossible/invalid date must surface inline on the field, never
+- [~] R20.2 — Date-input robustness — an impossible/invalid date must surface inline on the field, never
       throw and crash the page; guard every date-accepting path client + server
 
 ## Sequencing & file overlap
