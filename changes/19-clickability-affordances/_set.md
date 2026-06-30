@@ -16,7 +16,7 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
       clickable element; pointer cursor + color shift for clickable icons), built on the Forest Floor tokens
 - [x] R19.2 — Site-wide rollout + audit — apply the convention to every interactive surface (deliverables,
       inline-editable items, subtasks, icon buttons, lists, calendar, modals…), verified with Playwright
-- [t] R19.3 — Audit completion + tuning (set REOPENED 2026-06-30) — R19.2's audit was not exhaustive: the
+- [x] R19.3 — Audit completion + tuning (set REOPENED 2026-06-30) — R19.2's audit was not exhaustive: the
       **Users & Roles page (`/pm/users`)** controls still have no hover cue, the **inline status pill** has
       no pointer cursor, and the **deliverable row hover tint is too strong**. Finish the audit so EVERY
       clickable element in EVERY view carries the cue, soften the row tint, and back it with a Playwright
@@ -69,3 +69,8 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
   and the deliverable row hover tint reads too strong. R19.2's audit-matrix `[x]` for `pm/users` and its
   consistency Tests were over-claimed (marked done without truly verifying every view). Corrective work
   tracked in **R19.3**; R19.1/R19.2 left as the historical record.
+- 2026-06-30 — **R19.3 complete & merged to `main`** (`feat/set19/R19.3-audit-completion-tuning`, merge
+  commit on main). Audit made exhaustive (cursor-pointer on every `<select>` site-wide + raw buttons that
+  lacked it; only change-dropdown status elements get the cue), row tint softened 4%→2%, status pill
+  clickable. `pnpm build` clean; `e2e/r19-affordances.spec.ts` green (3 tests incl. 14-route audit sweep).
+  Set 19 now fully `[x]`.
