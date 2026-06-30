@@ -12,9 +12,9 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [ ] R19.1 — Affordance convention — shared utility classes + the documented rule (hover color cue for any
+- [t] R19.1 — Affordance convention — shared utility classes + the documented rule (hover color cue for any
       clickable element; pointer cursor + color shift for clickable icons), built on the Forest Floor tokens
-- [ ] R19.2 — Site-wide rollout + audit — apply the convention to every interactive surface (deliverables,
+- [~] R19.2 — Site-wide rollout + audit — apply the convention to every interactive surface (deliverables,
       inline-editable items, subtasks, icon buttons, lists, calendar, modals…), verified with Playwright
 
 ## Sequencing & file overlap

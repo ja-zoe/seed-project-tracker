@@ -32,3 +32,14 @@ session needs to avoid mistakes.
 The app exposes project tools via the Model Context Protocol at `POST /api/mcp` (JSON-RPC 2.0, protocol version `2024-11-05`). Auth via `Authorization: Bearer <mcpToken>` → `User.mcpToken` lookup; 401 if missing/invalid or user not ACTIVE. Users connect their own AI client (Claude Desktop, Cursor, etc.) with a personal token generated on `/account`. The model runs in the user's environment under their own subscription — **the app never handles API keys.**
 
 **Rejected:** "Bring your own API key" chat widget (R3.4, removed R4.1) — free API tiers exhaust immediately, billing is separate from site usage, and UX friction was high.
+
+### Clickability affordances (decided R19)
+
+Every interactive element carries a hover cue, built on Forest Floor tokens (no fills, underlines, shadows, or gradients). Shared utility classes live in `src/app/globals.css` (`@layer utilities`):
+
+- Clickable **icons / inline controls** → `.clickable-icon` (pointer cursor + color shift to forest `#2E4034` / `--primary` on hover).
+- Clickable **text / links** that are not container rows → `.clickable` (pointer + color shift to forest on hover).
+- **Destructive** triggers (delete/remove) → `.clickable-danger` (pointer + color shift to clay `#A4503C`).
+- Clickable **container rows** that open (deliverable/subtask rows) → `.clickable-row` (a subtle hover *tint* with **default cursor**) — the pointer belongs to the controls *inside* the row, so the row tint just tells you which row you're on.
+
+**Never** signal interactivity on static/display elements (non-button status badges, plain text) — affordances apply only to genuinely interactive elements.
