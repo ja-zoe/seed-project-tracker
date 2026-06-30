@@ -43,4 +43,6 @@ load only the feature(s) you are working on.
   - R20.2 [x]: `src/lib/date.ts` guard rolled out across all date-accepting actions + modals/inline editors;
     render guards added. `e2e/r20-date-robustness.spec.ts` green (4 tests).
   - `pnpm build` clean. Pre-existing unrelated failure: `e2e/r9-project-modal.spec.ts` (semester `<select>`
-    `.fill()` brittleness — see R20.2 notes). **Set branch ready; awaiting user approval to merge to `main`.**
+    `.fill()` brittleness — see R20.2 notes).
+- 2026-06-30 — **Set 20 complete. Merged `feat/set20-notify-clear-date-robustness` to `main`** and pushed.
+  Both features `[x]`.
