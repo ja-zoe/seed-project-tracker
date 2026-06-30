@@ -24,11 +24,12 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
 - No DB changes anywhere in this set.
 
 ## Open questions / decisions before implementing
-1. **R19.1 — the exact hover cue.** **Recommendation:** for text/labels and icons, shift from
-   `muted-foreground` → `foreground` (the forest `#2E4034`) on hover, matching patterns already in the code
-   (`hover:text-foreground`); destructive triggers shift to clay `#A4503C` (already the convention, e.g.
-   delete buttons); all clickable icons additionally get `cursor-pointer`. No new colors, no underlines, no
-   shadows (per CONTEXT style rules). Confirm this palette/behavior before the rollout.
+1. **R19.1 — the exact hover cue.** **RESOLVED 2026-06-30 (user):** color-shift on Forest Floor tokens
+   (normal → forest `#2E4034`, destructive → clay `#A4503C`), no background fill on controls. **Plus a
+   row-vs-control distinction:** clickable *container rows* (deliverable/subtask) get a subtle hover tint
+   with **default cursor** (so you can tell which row you're on), while the *controls inside* (inline-edit
+   icons, buttons) get the **pointer cursor** + color shift. See R19.1 for the class set
+   (`.clickable-row` / `.clickable-icon` / `.clickable` / `.clickable-danger`).
 2. **R19.2 — scope of "clickable".** **Recommendation:** apply to genuinely interactive elements only —
    buttons, links, icon-buttons, inline-edit triggers, sortable rows, calendar cells, modal controls.
    **Do not** add affordances to static/display elements (status badges that aren't buttons, plain text),
