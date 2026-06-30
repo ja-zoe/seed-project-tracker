@@ -12,9 +12,9 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [t] R19.1 — Affordance convention — shared utility classes + the documented rule (hover color cue for any
+- [x] R19.1 — Affordance convention — shared utility classes + the documented rule (hover color cue for any
       clickable element; pointer cursor + color shift for clickable icons), built on the Forest Floor tokens
-- [t] R19.2 — Site-wide rollout + audit — apply the convention to every interactive surface (deliverables,
+- [x] R19.2 — Site-wide rollout + audit — apply the convention to every interactive surface (deliverables,
       inline-editable items, subtasks, icon buttons, lists, calendar, modals…), verified with Playwright
 
 ## Sequencing & file overlap
@@ -52,3 +52,10 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
     main missing the set 18/19 spec commits.
   - **Not merged / not pushed** — awaiting user review. NB: the parallel Set 18 work added a `DELETE_USERS`
     Permission enum to the shared dev DB; a temporary (reverted) schema shim was needed only to run e2e.
+- 2026-06-30 — **Set 19 complete & merged to `main`** (integration merge `f32d37e`, after set 18). One
+  conflict (`action-items-section.tsx`) resolved in favour of set 18's `ClosedActionItemRow`; the affordance
+  convention was then applied to set 18's new controls (action-item inline/closed/modal delete, user-delete
+  button) since those didn't exist when this set's audit ran. Re-verified on the merged tree: `pnpm build`
+  clean; `e2e/r19-affordances.spec.ts` green + set-18/13/9 interaction specs green. (Two old `r7-*` specs
+  fail on a pre-existing stale `input[name="semester"]` selector — unrelated to this work.) **Local only —
+  not pushed** (per user). Both features `[x]`.

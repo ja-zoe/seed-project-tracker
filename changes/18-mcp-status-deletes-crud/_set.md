@@ -11,13 +11,13 @@ This file is the index and roll-up log for set 18. Per-feature specs live in the
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [t] R18.1 — MCP connection status on the account page — show whether the user has a live MCP
+- [x] R18.1 — MCP connection status on the account page — show whether the user has a live MCP
       connection and its type (personal access token vs OAuth/ChatGPT), via last-used tracking
-- [t] R18.2 — Delete active users — new `DELETE_USERS` permission + a PM UI control with the
+- [x] R18.2 — Delete active users — new `DELETE_USERS` permission + a PM UI control with the
       shared inline-confirm microinteraction
-- [t] R18.3 — Action-item deletion in the UI — inline (row) and from the modal, both using the
+- [x] R18.3 — Action-item deletion in the UI — inline (row) and from the modal, both using the
       shared `InlineConfirm` microinteraction
-- [t] R18.4 — Full action-item CRUD over MCP — add `delete_action_item` (create/update/list
+- [x] R18.4 — Full action-item CRUD over MCP — add `delete_action_item` (create/update/list
       already exist), gated by the same permissions as the UI
 
 ## Sequencing & file overlap
@@ -73,3 +73,7 @@ This file is the index and roll-up log for set 18. Per-feature specs live in the
   marker/baseURL reverted, not committed). Verified the soft-deleted user row in the DB is DELETED +
   scrubbed (null PII, rewritten unique email, null mcpToken, 0 sessions/assignments). NOT merged/pushed —
   left on the set branch for review. Note: dev DB is shared with set 19; this set's DDL is additive/safe.
+- 2026-06-30 — **Set 18 complete & merged to `main`** (fast-forward, commit `2ce66d9`), then set 19 merged
+  on top (integration merge `f32d37e`). Re-verified on the merged tree: `pnpm build` clean; e2e r18 6/6 +
+  r19 1/1 + r13 action-item inline/modal + r9 deliverable microinteractions all green. **Local only — not
+  pushed** (per user). All four features `[x]`.
