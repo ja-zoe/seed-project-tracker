@@ -15,7 +15,7 @@ This file is the index and roll-up log for set 18. Per-feature specs live in the
       connection and its type (personal access token vs OAuth/ChatGPT), via last-used tracking
 - [~] R18.2 — Delete active users — new `DELETE_USERS` permission + a PM UI control with the
       shared inline-confirm microinteraction
-- [ ] R18.3 — Action-item deletion in the UI — inline (row) and from the modal, both using the
+- [~] R18.3 — Action-item deletion in the UI — inline (row) and from the modal, both using the
       shared `InlineConfirm` microinteraction
 - [ ] R18.4 — Full action-item CRUD over MCP — add `delete_action_item` (create/update/list
       already exist), gated by the same permissions as the UI
