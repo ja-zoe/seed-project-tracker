@@ -11,13 +11,13 @@ This file is the index and roll-up log for set 18. Per-feature specs live in the
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [~] R18.1 — MCP connection status on the account page — show whether the user has a live MCP
+- [t] R18.1 — MCP connection status on the account page — show whether the user has a live MCP
       connection and its type (personal access token vs OAuth/ChatGPT), via last-used tracking
-- [~] R18.2 — Delete active users — new `DELETE_USERS` permission + a PM UI control with the
+- [t] R18.2 — Delete active users — new `DELETE_USERS` permission + a PM UI control with the
       shared inline-confirm microinteraction
-- [~] R18.3 — Action-item deletion in the UI — inline (row) and from the modal, both using the
+- [t] R18.3 — Action-item deletion in the UI — inline (row) and from the modal, both using the
       shared `InlineConfirm` microinteraction
-- [~] R18.4 — Full action-item CRUD over MCP — add `delete_action_item` (create/update/list
+- [t] R18.4 — Full action-item CRUD over MCP — add `delete_action_item` (create/update/list
       already exist), gated by the same permissions as the UI
 
 ## Sequencing & file overlap
@@ -62,3 +62,14 @@ This file is the index and roll-up log for set 18. Per-feature specs live in the
 ## Log
 - 2026-06-30 — Set 18 scaffolded (specs only). Four features; R18.1 & R18.2 have design decisions for the
   user to confirm. Branch (when work starts): `feat/set18-mcp-status-deletes-crud`.
+- 2026-06-30 — All four features implemented on `feat/set18-mcp-status-deletes-crud` (one commit each),
+  tests passing. DDL applied to the shared dev DB via `scripts/apply-schema.ts`: (1) `McpConnectionType`
+  enum + `McpConnection` table (FK→User ON DELETE CASCADE, `UNIQUE(userId,type,clientId)`); (2)
+  `Permission += DELETE_USERS`, `UserStatus += DELETED` (each its own statement); plus a one-off back-fill
+  `UPDATE "Role" SET permissions = array_append(permissions,'DELETE_USERS') WHERE name='Project Manager'`.
+  `schema.prisma` + `prisma generate` updated; `prisma/seed.ts` grants `DELETE_USERS` to PM going forward.
+  `pnpm build` clean. e2e: 3 new specs under `e2e/` (`r18-mcp-status-crud`, `r18-action-item-delete`,
+  `r18-delete-users`), 6 tests, all green (ran with temp marker `[e2e18] ` on a private dev port; temp
+  marker/baseURL reverted, not committed). Verified the soft-deleted user row in the DB is DELETED +
+  scrubbed (null PII, rewritten unique email, null mcpToken, 0 sessions/assignments). NOT merged/pushed —
+  left on the set branch for review. Note: dev DB is shared with set 19; this set's DDL is additive/safe.
