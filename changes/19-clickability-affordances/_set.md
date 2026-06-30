@@ -14,7 +14,7 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
 - [t] R19.1 — Affordance convention — shared utility classes + the documented rule (hover color cue for any
       clickable element; pointer cursor + color shift for clickable icons), built on the Forest Floor tokens
-- [~] R19.2 — Site-wide rollout + audit — apply the convention to every interactive surface (deliverables,
+- [t] R19.2 — Site-wide rollout + audit — apply the convention to every interactive surface (deliverables,
       inline-editable items, subtasks, icon buttons, lists, calendar, modals…), verified with Playwright
 
 ## Sequencing & file overlap
@@ -41,3 +41,14 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
 ## Log
 - 2026-06-30 — Set 19 scaffolded (specs only). Two features: convention (R19.1) then audited rollout +
   Playwright (R19.2). Branch (when work starts): `feat/set19-clickability-affordances`.
+- 2026-06-30 — Implemented both features on `feat/set19-clickability-affordances`.
+  - R19.1 [t]: `.clickable-row` / `.clickable-icon` / `.clickable` / `.clickable-danger` added to
+    `globals.css`; convention documented in `CONTEXT.md` standing decisions. Hover color = forest
+    `--primary` (#2E4034) per user decision; rows tint with default cursor.
+  - R19.2 [t]: convention rolled out across `sortable-deliverables`, action items, modals (via shadcn
+    `Button` base), projects list, calendar, account, pm pages, sidebar, markdown editor, etc. Static
+    display elements untouched. `pnpm build` clean; `e2e/r19-affordances.spec.ts` green (1 passed).
+  - Branch was rebased onto current `main` (`12852b1`) at start — the worktree had been cut from a stale
+    main missing the set 18/19 spec commits.
+  - **Not merged / not pushed** — awaiting user review. NB: the parallel Set 18 work added a `DELETE_USERS`
+    Permission enum to the shared dev DB; a temporary (reverted) schema shim was needed only to run e2e.
