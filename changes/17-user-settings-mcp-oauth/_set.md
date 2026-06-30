@@ -14,10 +14,9 @@ This file is the index and roll-up log for set 17. Per-feature specs live in the
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
 - [x] R17.1 — Self-service user settings page — any user can edit firstName / lastName / nickname
       (email is read-only CAS identity); lives on the existing `/account` page
-- [~] R17.2 — MCP OAuth 2.1 support so ChatGPT (web) can connect — make `/api/mcp` an OAuth-protected
+- [x] R17.2 — MCP OAuth 2.1 support so ChatGPT (web) can connect — make `/api/mcp` an OAuth-protected
       resource via **Stytch Connected Apps** (keeps CAS login) alongside the static-token path.
-      **Code complete + builds/boots + all locally-verifiable checks pass; merged to `main` so the
-      deploy-only checks (live OAuth round-trip in ChatGPT) can be done. Stays `[~]` until that passes.**
+      **Verified live on the deploy 2026-06-30 — ChatGPT connect works end-to-end.**
 
 ## Sequencing & file overlap
 - Independent. R17.1: `account` page + `profile.ts`. R17.2: `api/mcp` + new auth routes/metadata.
@@ -57,3 +56,9 @@ This file is the index and roll-up log for set 17. Per-feature specs live in the
   discovery (commit 8628490); (2) `/oauth/authorize` now names any missing Stytch env var to self-diagnose
   a misconfigured deploy (commit 0ad7400). ChatGPT connects + reaches CAS sign-in; remaining gate is a
   missing Vercel env var + the live consent round-trip. R17.2 still `[~]`.
+- 2026-06-30 — R17.2 final fixes (on `main`): build error (`IntrospectTokenClaims` cast), transient Stytch
+  `NoCurrentSessionError` on the consent page, OAuth-token email mapping, and the decisive one — verify the
+  access token via `jose` JWKS instead of `idp.introspectTokenLocal` (which rejected the Connected-App
+  issuer). See R17.2 Notes/log for the per-fix detail.
+- 2026-06-30 — **Set 17 complete.** R17.2 verified live (ChatGPT OAuth connect works end-to-end); R17.1
+  done. Both features `[x]`; all code already on `main`.
