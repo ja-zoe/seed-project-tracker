@@ -16,6 +16,11 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
       clickable element; pointer cursor + color shift for clickable icons), built on the Forest Floor tokens
 - [x] R19.2 — Site-wide rollout + audit — apply the convention to every interactive surface (deliverables,
       inline-editable items, subtasks, icon buttons, lists, calendar, modals…), verified with Playwright
+- [ ] R19.3 — Audit completion + tuning (set REOPENED 2026-06-30) — R19.2's audit was not exhaustive: the
+      **Users & Roles page (`/pm/users`)** controls still have no hover cue, the **inline status pill** has
+      no pointer cursor, and the **deliverable row hover tint is too strong**. Finish the audit so EVERY
+      clickable element in EVERY view carries the cue, soften the row tint, and back it with a Playwright
+      sweep that enumerates clickables per route.
 
 ## Sequencing & file overlap
 - **R19.1 first** (it defines the utilities R19.2 applies). R19.1 is small and isolated to `globals.css`
@@ -59,3 +64,8 @@ This file is the index and roll-up log for set 19. Per-feature specs live in the
   clean; `e2e/r19-affordances.spec.ts` green + set-18/13/9 interaction specs green. (Two old `r7-*` specs
   fail on a pre-existing stale `input[name="semester"]` selector — unrelated to this work.) **Local only —
   not pushed** (per user). Both features `[x]`.
+- 2026-06-30 — **Set REOPENED.** User review found R19.2's "audit the entire site" claim was not met:
+  `/pm/users` (Users & Roles) controls show no hover cue, the inline status pill lacks a pointer cursor,
+  and the deliverable row hover tint reads too strong. R19.2's audit-matrix `[x]` for `pm/users` and its
+  consistency Tests were over-claimed (marked done without truly verifying every view). Corrective work
+  tracked in **R19.3**; R19.1/R19.2 left as the historical record.
