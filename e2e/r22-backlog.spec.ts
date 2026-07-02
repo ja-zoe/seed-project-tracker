@@ -87,7 +87,8 @@ test("Excel export lists backlogged deliverables under a Backlog grouping", asyn
   expect(res.status()).toBe(200);
 
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(await res.body());
+  // exceljs ships its own (older) Buffer typing — the runtime value is compatible.
+  await workbook.xlsx.load((await res.body()) as unknown as Parameters<typeof workbook.xlsx.load>[0]);
   const sheet = workbook.getWorksheet("Timeline")!;
   const rows: { type: string; title: string }[] = [];
   sheet.eachRow((r) => {
