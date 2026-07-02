@@ -12,13 +12,13 @@ load only the feature(s) you are working on.
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [t] R22.1 — Deliverable backlog — move a deliverable to/from a Backlog section so current-semester
+- [x] R22.1 — Deliverable backlog — move a deliverable to/from a Backlog section so current-semester
       tasking reflects real capacity; excluded from timeline and red-flag lateness
 - [x] R22.2 — Markdown heading hierarchy — h1/h2/h3 must be visually distinct in preview and display;
       consolidate the editor's duplicate render path into MarkdownView
 - [x] R22.3 — Multi-day calendar events — an event spanning days appears on every day it covers in the
       month grid, not just its start day
-- [ ] R22.4 — CRUD loading & confirmation feedback — shared pending-spinner + success-confirmation
+- [~] R22.4 — CRUD loading & confirmation feedback — shared pending-spinner + success-confirmation
       primitives rolled out to every create/update/delete trigger in the app
 
 ## Sequencing & file overlap
