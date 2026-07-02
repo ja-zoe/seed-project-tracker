@@ -1,6 +1,6 @@
 # R22.4 — Loading & confirmation feedback on every CRUD mutation
 
-**Status:** tests passing
+**Status:** done
 **Files:** `src/components/submit-button.tsx` (upgrade), `src/components/action-feedback.tsx` (new) — then
 rollout across every component with a mutation trigger (inventory below).
 
