@@ -18,7 +18,7 @@ load only the feature(s) you are working on.
       consolidate the editor's duplicate render path into MarkdownView
 - [x] R22.3 — Multi-day calendar events — an event spanning days appears on every day it covers in the
       month grid, not just its start day
-- [~] R22.4 — CRUD loading & confirmation feedback — shared pending-spinner + success-confirmation
+- [t] R22.4 — CRUD loading & confirmation feedback — shared pending-spinner + success-confirmation
       primitives rolled out to every create/update/delete trigger in the app
 
 ## Sequencing & file overlap
