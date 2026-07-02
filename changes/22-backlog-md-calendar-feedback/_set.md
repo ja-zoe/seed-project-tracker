@@ -64,3 +64,4 @@ load only the feature(s) you are working on.
   (pre-existing: dashboard section intercepts bell-popover clicks; r7 semester hidden-input fill) — logged
   in R22.4 tests.md as candidates for a future set.
 - **Set branch ready for user review + merge to `main` (not merged — user is the final gate).**
+- 2026-07-02 — **Set 22 complete. Merged `feat/set22-backlog-md-calendar-feedback` to `main`** and pushed. All four features `[x]`.
