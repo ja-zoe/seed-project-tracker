@@ -12,13 +12,13 @@ load only the feature(s) you are working on.
 
 ## Status
 <!-- markers: [ ] not started · [~] in progress · [t] tests passing, awaiting merge · [x] merged -->
-- [ ] R22.1 — Deliverable backlog — move a deliverable to/from a Backlog section so current-semester
+- [x] R22.1 — Deliverable backlog — move a deliverable to/from a Backlog section so current-semester
       tasking reflects real capacity; excluded from timeline and red-flag lateness
-- [ ] R22.2 — Markdown heading hierarchy — h1/h2/h3 must be visually distinct in preview and display;
+- [x] R22.2 — Markdown heading hierarchy — h1/h2/h3 must be visually distinct in preview and display;
       consolidate the editor's duplicate render path into MarkdownView
-- [ ] R22.3 — Multi-day calendar events — an event spanning days appears on every day it covers in the
+- [x] R22.3 — Multi-day calendar events — an event spanning days appears on every day it covers in the
       month grid, not just its start day
-- [ ] R22.4 — CRUD loading & confirmation feedback — shared pending-spinner + success-confirmation
+- [x] R22.4 — CRUD loading & confirmation feedback — shared pending-spinner + success-confirmation
       primitives rolled out to every create/update/delete trigger in the app
 
 ## Sequencing & file overlap
@@ -54,3 +54,13 @@ load only the feature(s) you are working on.
 
 ## Log
 - 2026-07-02 — Set 22 scaffolded (specs only). Branch (when work starts): `feat/set22-backlog-md-calendar-feedback`.
+- 2026-07-02 — Open questions resolved: user's "go ahead and start implementing" accepted all three
+  recommendations (backlog = boolean column; backlogged items excluded from red-flag Condition A with the
+  always-visible Backlog section as PM mitigation; in-place confirmations, no toast system).
+- 2026-07-02 — All four features implemented & merged into the set branch (order: R22.2 → R22.3 → R22.1 →
+  R22.4). Backlog DDL applied to the shared dev DB. Per-feature gates green: 9 Playwright tests across four
+  new r22 specs, plus live red-flag + MCP verification for R22.1. `pnpm build` clean; app boots.
+  Regression batch over R22.4's touched surfaces: 3 failures, all reproduce identically on `main`
+  (pre-existing: dashboard section intercepts bell-popover clicks; r7 semester hidden-input fill) — logged
+  in R22.4 tests.md as candidates for a future set.
+- **Set branch ready for user review + merge to `main` (not merged — user is the final gate).**
