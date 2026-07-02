@@ -43,3 +43,22 @@ Every interactive element carries a hover cue, built on Forest Floor tokens (no 
 - Clickable **container rows** that open (deliverable/subtask rows) → `.clickable-row` (a subtle hover *tint* with **default cursor**) — the pointer belongs to the controls *inside* the row, so the row tint just tells you which row you're on.
 
 **Never** signal interactivity on static/display elements (non-button status badges, plain text) — affordances apply only to genuinely interactive elements.
+
+### Cross-surface parity (learned set 21)
+
+Any lead-facing capability or field spans several surfaces that silently drift apart. When touching one,
+sync them all:
+
+- **Write surfaces:** the server action, the page-level auth guard, the UI component's `can*` props/controls,
+  any standalone edit page, and the MCP tool in `src/app/api/mcp/route.ts`. The MCP tool is the easiest to
+  miss — it duplicates gate logic instead of calling the server action.
+- **Parity dimensions:** permission gates, input fields (an edit modal must expose every input its create
+  form has, and vice versa), display fields (a recent-N summary must show what the see-all page shows), and
+  cross-field validation (create + MCP paths must enforce what the edit paths enforce; MCP partial updates
+  must validate the merged post-update row).
+- **Lead capability comes from `ProjectAssignment` (LEAD/SUBLEAD), not the global role** — the seeded
+  "Project Lead" role deliberately lacks MANAGE_MILESTONES etc. Cross-project listing pages
+  (`/action-items`, `/my-tasks`, dashboard) must compute editability **per item** from the user's lead
+  assignments; a single global-permission boolean silently strips lead abilities.
+- **`revalidatePath` every listing surface** that renders the mutated record (project page, `/history`,
+  `/my-tasks`, `/action-items`), not just the page the mutation happened on.
