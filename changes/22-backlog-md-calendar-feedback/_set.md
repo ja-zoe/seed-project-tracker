@@ -16,7 +16,7 @@ load only the feature(s) you are working on.
       tasking reflects real capacity; excluded from timeline and red-flag lateness
 - [x] R22.2 — Markdown heading hierarchy — h1/h2/h3 must be visually distinct in preview and display;
       consolidate the editor's duplicate render path into MarkdownView
-- [~] R22.3 — Multi-day calendar events — an event spanning days appears on every day it covers in the
+- [t] R22.3 — Multi-day calendar events — an event spanning days appears on every day it covers in the
       month grid, not just its start day
 - [ ] R22.4 — CRUD loading & confirmation feedback — shared pending-spinner + success-confirmation
       primitives rolled out to every create/update/delete trigger in the app
